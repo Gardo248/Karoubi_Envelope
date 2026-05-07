@@ -157,7 +157,7 @@ InstallMethod( KaroubiEnvelope,
 
     ##
     AddIsWellDefinedForObjects( karoubi_envelope,
-        function( object )
+        function( karoubi_envelope, object )
 	local idem;
 	idem := Idempotent(object);
         

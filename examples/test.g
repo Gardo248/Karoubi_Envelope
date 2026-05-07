@@ -1,5 +1,10 @@
-LoadPackage("KaroubiEnvelope");
-LoadPackage( "LinearAlgebraForCAP" );
+
+LoadPackage( "CAP", false );
+LoadPackage( "LinearAlgebraForCAP", false );
+
+#LoadPackage("KaroubiEnvelope");
+Read("../gap/KaroubiEnvelope.gd");
+Read("../gap/KaroubiEnvelope.gi");
 
 Q := HomalgFieldOfRationals();
 

@@ -43,8 +43,9 @@ DeclareCategory( "IsKaroubiMorphism",
 #! The output is its underlying object in the original category.
 #! @Returns an object in $\mathbf{A}$
 #! @Arguments a
+#TODO Why not an attribute?
 DeclareOperation( "UnderlyingObject",
-                  [ IsKaroubiObject ] );
+                  [ IsKaroubiObject ] );                  
 		  
 #! @Description
 #! The argument is an object $a$ in the Karoubi envelope of a category.
@@ -98,7 +99,7 @@ DeclareProperty( "IsFullObject",
 
 #! @Description
 #! The argument is an idempotent $e:a\rightarrow a$ of the Karoubi envelope $\mathbf{K(A)}$.
-#! The output is the universal objet that split $e$
+#! The output is the universal objet that splits $e$
 #! @Returns an object in $\mathbf{K(A)}$
 #! @Arguments e
 DeclareOperation( "UniversalSplitObject",
