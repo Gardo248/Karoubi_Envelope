@@ -143,6 +143,7 @@ InstallMethod( KaroubiEnvelope,
     mor_const := triple[3];
 
     ##
+    #TODO Are these the object and morphism constructors? Shall we implement with AddObjectConstructor and AddMorphismConstructor
     InstallMethod( KaroubiObject,
     		   [ IsCapCategoryMorphism ],
         function (idempotent)
@@ -156,6 +157,7 @@ InstallMethod( KaroubiEnvelope,
     end);
 
     ##
+    #Shall we add the "if CanCompute( C, "IsWellDefinedForObjects" ) then..." 
     AddIsWellDefinedForObjects( karoubi_envelope,
         function( karoubi_envelope, object )
 	local idem;

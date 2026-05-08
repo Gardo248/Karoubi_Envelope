@@ -156,3 +156,6 @@ DeclareAttribute( "KaroubiEnvelope",
                   IsCapCategory );
 
 
+#TODO add the types
+
+
