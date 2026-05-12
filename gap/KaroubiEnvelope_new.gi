@@ -1,18 +1,3 @@
-#Q: need this to understand if a morphism is an idempotent or not, is this the correct way? Do I have to put something in the gd file? Like an attribute or an operation? In the old Karoubi envelope is not declared IsIdempotent. is it because it already exists in GAP? Should I find a better name and declare a new Attribute or property with this name?
-#note: take a morphism of the category and return a boolean that tells you if the morphism is an idempotent or not
-InstallMethod ( IsIdempotent,
-	        [ IsCapCategoryMorphism ],
-    function (f)
-    return IsCongruentForMorphisms( PreCompose(f, f), f );
-end);
-
-InstallMethod ( IsMorphismOfIdempotents,
-                [ IsIdempotent, IsCapCategoryMorphism, IsIdempotent ],
-    function(e, p, f)
-    return IsCongruentForMorphisms(p, PreCompose(f, PreCompose(p, e)) );
-
-end)
-
 InstallMethod(
     "for a CAP category",
     [IsCapCategory],
@@ -29,9 +14,45 @@ InstallMethod(
         CapJitDataTypeOfMorphismOfCategory( C ), #is this right? Do I have to put the condition on the morphism here?
     fail );
      
-    #Q: Is this a good definition? Does it make sense? Should I use instead AddCategoryObjectWithAttributes? It seems unnecessary, I only have a morphism in the underlying category that, after I checked it is an idempotent, I use as object in the new category. Where did I checked that it is indeed an idempotent?
+    #Q: Is this a good definition? Does it make sense? Should I use instead AddCategoryObjectWithAttributes? It seems unnecessary, I only have a morphism in the underlying category that I use as object in the new category. I will postpone the check that the morphism is an idempotent inside the IsWellDefinedForObject
     AddObjectConstructor(KarEnvC,
         function(KarEnvC, idempotent)
-        return AddObject( category, idempotent )
+        return CreateCapCategoryObjectWithAttributes( KarEnvC, IdempotentDatum, idempotent, UnderlyingSourceOfIdempotent, Source(idempotent) )
     end);
+
+    #Q: clarify exactly what is the purpose of this
+    AddObjectDatum(KarEnvC,
+        function (KarEnvC, obj)
+        return IdempotentDatum ( obj );
+    end);
+
+# In case I want to separate the datum of the underlying object (the source of the idempotent) from the constructor, I can do it in this way, adding the attribute "UnderlyingObjectForKaroubiObjects" in the declaration file
+    # InstallMethod(UnderlyingObjectForKaroubiObjects,
+    #             [ IsKaroubiObject ],
+    #     function (obj)
+    #     return Source( IdempotentDatum (obj) );
+    # end);
+#Q: shouldn't I implement somehow the underlying category attribute? I saw that Lippa did't
+if CanCompute( C, "IsWellDefinedForObjects" ) then
+        AddIsWellDefinedForObjects( KarEnvC,
+            function ( KarEnvC, obj )
+                local C, e;
+                C := UnderlyingCategory( KarEnvC );
+                e := IdempotentDatum ( obj );
+
+                return IsCongruentForMorphisms( C, PreCompose(f, f), f );
+            end );
+fi;
+
+
+
+
+
+
+
+    # AddMorphismConstructor(KarEnvC,
+    #     function(KarEnvC, idempotent)
+    #     return AddObject( category, idempotent )
+    # end);
+
 end)
