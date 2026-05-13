@@ -85,43 +85,44 @@ InstallMethod(
         function ( KarEnvC, morphism1, morphism2 )
             local C, mor1, mor2;
             C := UnderlyingCategory( KarEnvC );
-            mor1 := UnderlyingMorphism ( morphism1 );
-            mor2 := UnderlyingMorphism ( morphism2 );
-            return(IsCongruentForMorphisms(C, mor1, mor2 ));
+            f1 := UnderlyingMorphism ( morphism1 );
+            f2 := UnderlyingMorphism ( morphism2 );
+            return(IsCongruentForMorphisms(C, f1, f2 ));
         end );
 
     if CanCompute( C, "IsWellDefinedForMorphisms" ) then
-            AddIsWellDefinedForMorphisms( IC,
-                function ( IC, f )
+            AddIsWellDefinedForMorphisms( KarEnvC,
+                function ( KarEnvC, f )
                     local C, f_l, s_l, t_l;
                     C := UnderlyingCategory( IC );
-                    f_l := ListDatum( f );
-                    s_l := ListDatum( Source( f ) );
-                    t_l := ListDatum( Target( f ) );
-
-                    if Length( f_l ) = 0 then
-                        return Length( s_l ) = 0;
-                    elif Length( f_l ) = 1 then
-                        return Length( s_l ) = 1 and Length( t_l ) = 1
-                            and IsWellDefinedForMorphismsWithGivenSourceAndRange( C, s_l[1], f_l[1], t_l[1] );
-                            # Q: can I assume that the "WithGivenSourceAndRange" variant is defined?
-                            # (does it just check equality of the objects?)
-                    else
-                        return false;
-                    fi;
+                    f_u := UnderlyingMorphism( f );
+                    e_s := IdempotentDatum( Source( f ) );
+                    e_t := IdempotentDatum( Target ( f ) );
+                    s_u := Source ( e_s );
+                    t_u := Source ( e_t );
+                    return IsWellDefinedForMorphismsWithGivenSourceAndRange( C, s_u, f_u, t_u ) and IsCongruentForMorphisms( f, PreCompose( e_s, PreCompose( f, e_t ) ) );
                 end );
         fi;
 
+    AddIdentityMorphism( KarEnvC,
+            function ( KarEnvC, object )
+                local C, under_obj;
+                C := UnderlyingCategory( KarEnvC );
+                under_obj := Source( IdempotentDatum( object ) );
+            return MorphismConstructor( KarEnvC, object, object, IdentityMorphism( C, under_object ) );
+            end );
 
-
-
-
-
-
-
-    # AddMorphismConstructor(KarEnvC,
-    #     function(KarEnvC, idempotent)
-    #     return AddObject( category, idempotent )
-    # end);
+    AddPreCompose( KarEnvC,
+            function ( KarEnvC, f, g )
+                #    f     g
+                # x --> y --> z
+                local C, x, z, f_under, g_under;
+                C := UnderlyingCategory( KarEnvC );
+                x := Source( f ) ;
+                z := Target( g );
+                f_under := UnderlyingMorphism( f );
+                g_under := UnderlyingMorphism( g );
+                return MorphismConstructor( KarEnvC, x, z, PreCompose( C, f_under, g_under ), z);
+            end );
 
 end)
