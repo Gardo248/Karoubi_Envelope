@@ -26,6 +26,7 @@ InstallMethod(
         return IdempotentDatum ( obj );
     end);
 
+#not much interesting idea: 
 # In case I want to separate the datum of the underlying object (the source of the idempotent) from the constructor, I can do it in this way, adding the attribute "UnderlyingObjectForKaroubiObjects" in the declaration file
     # InstallMethod(UnderlyingObjectForKaroubiObjects,
     #             [ IsKaroubiObject ],
@@ -55,7 +56,11 @@ AddIsEqualForObjects( KarEnvC,
                 return IsCongruentForMorphisms( C, e1, e2 );
             end );
     
+AddMorphismConstructor( KarEnvC,
+            function ( KarEnvC, s, t, morphism )
 
+                return CreateCapCategoryMorphismWithAttributes( IC, s, t, ListDatum, list );
+            end );
 
 
 
