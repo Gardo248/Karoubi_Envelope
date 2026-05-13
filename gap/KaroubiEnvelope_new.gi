@@ -32,6 +32,7 @@ InstallMethod(
     #     function (obj)
     #     return Source( IdempotentDatum (obj) );
     # end);
+
 #Q: shouldn't I implement somehow the underlying category attribute? I saw that Lippa did't
 if CanCompute( C, "IsWellDefinedForObjects" ) then
         AddIsWellDefinedForObjects( KarEnvC,
@@ -43,6 +44,17 @@ if CanCompute( C, "IsWellDefinedForObjects" ) then
                 return IsCongruentForMorphisms( C, PreCompose(f, f), f );
             end );
 fi;
+
+AddIsEqualForObjects( KarEnvC,
+            function ( KarEnvC, obj1, obj2 )
+                local KarEnvC, l1, l2;
+                C := UnderlyingCategory( IC );
+                e1 := IdempotentDatum( obj1 );
+                e2 := IdempotentDatum( obj2 );
+
+                return IsCongruentForMorphisms( C, e1, e2 );
+            end );
+    
 
 
 
