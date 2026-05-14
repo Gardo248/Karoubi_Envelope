@@ -125,4 +125,14 @@ InstallMethod(
                 return MorphismConstructor( KarEnvC, x, z, PreCompose( C, f_under, g_under ), z);
             end );
 
+    #Q: do I have to add manually: if CanCompute... then AddIsMonomorphism, AddIsEpimorphism, AddIsIsomorphism, AddIsSplitMonomorphism, AddInverseMorphism,  AddCoproduct, AddInitialObject, AddTerminalObject, AddDirectProduct, ecc...
+
+    #Q: there is this line of code inside the old file, what do it does? Do I have to add it, in some other form?
+    #category_weight_list := category!.derivations_weight_list;
+    #Q:Then he add manually a lot of methods lime kernelobject, zeroObject, KernelLift
+    #Q: should I add something like the essential image of the underlying category? Should I add the formal splitting of an element in this essential image? Should I implement a proof (maybe in the example file) that in KarEnvC all the idempotent splits?
+
+
+
+
 end)
