@@ -11,13 +11,14 @@ InstallMethod(
         IsKaroubiMorphism,
         IsCapCategoryTwoCell,
         CapJitDataTypeOfMorphismOfCategory( C ),
-        CapJitDataTypeOfMorphismOfCategory( C ), #is this right? Do I have to put the condition on the morphism here?
+        CapJitDataTypeOfMorphismOfCategory( C ),
     fail );
 
     #note: I set the source category C as the Underlying category of the output category KarEnvC
     SetUnderlyingCategory( KarEnvC, C );
      
-    #Q: Is this a good definition? Does it make sense? Should I use instead AddCategoryObjectWithAttributes? It seems unnecessary, I only have a morphism in the underlying category that I use as object in the new category. I will postpone the check that the morphism is an idempotent inside the IsWellDefinedForObject
+    #Q: Is this a good definition? I will postpone the check that the morphism is an idempotent inside the IsWellDefinedForObject.
+    #Q: Should I eliminate the datum of the source of the idempotent? Perhaps turn it into an operation.  
     AddObjectConstructor(KarEnvC,
         function(KarEnvC, idempotent)
         return CreateCapCategoryObjectWithAttributes( KarEnvC, IdempotentDatum, idempotent, UnderlyingSourceOfIdempotent, Source(idempotent) )
@@ -37,7 +38,6 @@ InstallMethod(
     #     return Source( IdempotentDatum (obj) );
     # end);
 
-#Q: shouldn't I implement somehow the underlying category attribute? I saw that Lippa did't
     if CanCompute( C, "IsWellDefinedForObjects" ) then
         AddIsWellDefinedForObjects( KarEnvC,
             function ( KarEnvC, obj )
@@ -45,10 +45,11 @@ InstallMethod(
                 C := UnderlyingCategory( KarEnvC );
                 e := IdempotentDatum ( obj );
 
-                return IsCongruentForMorphisms( C, PreCompose(f, f), f );
+                return IsCongruentForMorphisms( C, PreCompose(e, e), e );
             end );
     fi;
 
+    #Q: is it better to use IsCongruentForMorphisms or IsEqualForMorphisms?
     AddIsEqualForObjects( KarEnvC,
             function ( KarEnvC, obj1, obj2 )
                 local KarEnvC, l1, l2;
@@ -58,24 +59,24 @@ InstallMethod(
 
                 return IsCongruentForMorphisms( C, e1, e2 );
             end );
-     
+ 
     AddMorphismConstructor( KarEnvC,
-            function ( KarEnvC, s, t, morph )
+            function ( KarEnvC, s, morph, t )
 
-                return CreateCapCategoryMorphismWithAttributes( KarEnvC, s, t, UnderlyingMorphism, morph);
+                return CreateCapCategoryMorphismWithAttributes( KarEnvC, s, t, UnderlyingMorphismDatum, morph);
             end );
 
     AddMorphismDatum(KarEnvC,
         function (KarEnvC, morph)
-        return UnderlyingMorphism ( morph );
+        return UnderlyingMorphismDatum ( morph );
     end);
 
     AddIsEqualForMorphisms( KarEnvC,
             function ( KarEnvC, morphism1, morphism2 )
                 local C, mor1, mor2;
                 C := UnderlyingCategory( KarEnvC );
-                mor1 := UnderlyingMorphism ( morphism1 );
-                mor2 := UnderlyingMorphism ( morphism2 );
+                mor1 := UnderlyingMorphismDatum ( morphism1 );
+                mor2 := UnderlyingMorphismDatum ( morphism2 );
                 return(IsEqualForMorphisms(C, mor1, mor2 ));
             end );
 
@@ -85,8 +86,8 @@ InstallMethod(
         function ( KarEnvC, morphism1, morphism2 )
             local C, mor1, mor2;
             C := UnderlyingCategory( KarEnvC );
-            f1 := UnderlyingMorphism ( morphism1 );
-            f2 := UnderlyingMorphism ( morphism2 );
+            f1 := UnderlyingMorphismDatum ( morphism1 );
+            f2 := UnderlyingMorphismDatum ( morphism2 );
             return(IsCongruentForMorphisms(C, f1, f2 ));
         end );
 
@@ -95,7 +96,7 @@ InstallMethod(
                 function ( KarEnvC, f )
                     local C, f_l, s_l, t_l;
                     C := UnderlyingCategory( IC );
-                    f_u := UnderlyingMorphism( f );
+                    f_u := UnderlyingMorphismDatum( f );
                     e_s := IdempotentDatum( Source( f ) );
                     e_t := IdempotentDatum( Target ( f ) );
                     s_u := Source ( e_s );
@@ -106,10 +107,10 @@ InstallMethod(
 
     AddIdentityMorphism( KarEnvC,
             function ( KarEnvC, object )
-                local C, under_obj;
+                local C, idempotent;
                 C := UnderlyingCategory( KarEnvC );
-                under_obj := Source( IdempotentDatum( object ) );
-            return MorphismConstructor( KarEnvC, object, object, IdentityMorphism( C, under_object ) );
+                idempotent := IdempotentDatum( object ) ;
+            return MorphismConstructor( KarEnvC, object, idempotent, object );
             end );
 
     AddPreCompose( KarEnvC,
@@ -120,9 +121,9 @@ InstallMethod(
                 C := UnderlyingCategory( KarEnvC );
                 x := Source( f ) ;
                 z := Target( g );
-                f_under := UnderlyingMorphism( f );
-                g_under := UnderlyingMorphism( g );
-                return MorphismConstructor( KarEnvC, x, z, PreCompose( C, f_under, g_under ), z);
+                f_under := UnderlyingMorphismDatum( f );
+                g_under := UnderlyingMorphismDatum( g );
+                return MorphismConstructor( KarEnvC, x, PreCompose( C, f_under, g_under ), z );
             end );
 
     #Q: do I have to add manually: if CanCompute... then AddIsMonomorphism, AddIsEpimorphism, AddIsIsomorphism, AddIsSplitMonomorphism, AddInverseMorphism,  AddCoproduct, AddInitialObject, AddTerminalObject, AddDirectProduct, ecc...

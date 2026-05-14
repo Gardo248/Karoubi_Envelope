@@ -25,5 +25,5 @@ DeclareAttribute("UnderlyingSourceOfIdempotent",
                 IsKaroubiObject);
 
 #note: we use this to define the morphism, it represent the type of the fundamental information necessary to define the morphism, i.e. a morphism between the source of the source idempotent and the source of the target idempotent in the underlying category
-DeclareAttribute("UnderlyingMorphism",
+DeclareAttribute("UnderlyingMorphismDatum",
                 IsKaroubiMorphism);
