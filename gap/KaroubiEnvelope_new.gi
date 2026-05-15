@@ -4,7 +4,6 @@ InstallMethod(
     function ( C )
     local KarEnvC;
 
-    #Q: in principle the datum of the object/morphism in the Karoubi envelope is only a morphism in the underlying category, but we also have conditions. As I understand CAP right now, I have to put such conditions on the constructor for objects/morphisms.
     KarEnvC := CreateCapCategoryWithDataTypes(
         Concatenation("KaroubiEnvelope(", Name(C), ")" ),
         IsKaroubiObject,
@@ -24,7 +23,6 @@ InstallMethod(
         return CreateCapCategoryObjectWithAttributes( KarEnvC, IdempotentDatum, idempotent, UnderlyingSourceOfIdempotent, Source(idempotent) )
     end);
 
-    #Q: clarify exactly what is the purpose of this
     AddObjectDatum(KarEnvC,
         function (KarEnvC, obj)
         return IdempotentDatum ( obj );
@@ -38,18 +36,19 @@ InstallMethod(
     #     return Source( IdempotentDatum (obj) );
     # end);
 
-    if CanCompute( C, "IsWellDefinedForObjects" ) then
+    if CanCompute( C, "IsCongruentForMorphisms" ) then
         AddIsWellDefinedForObjects( KarEnvC,
             function ( KarEnvC, obj )
                 local C, e;
                 C := UnderlyingCategory( KarEnvC );
                 e := IdempotentDatum ( obj );
 
-                return IsCongruentForMorphisms( C, PreCompose(e, e), e );
+                return IsCongruentForMorphisms( C, PreCompose( C, e, e ), e );
             end );
     fi;
 
     #Q: is it better to use IsCongruentForMorphisms or IsEqualForMorphisms?
+    #The point is tha Cap is functional and so I have to assure that equal inputs gives equal outputs!
     AddIsEqualForObjects( KarEnvC,
             function ( KarEnvC, obj1, obj2 )
                 local KarEnvC, l1, l2;
@@ -71,27 +70,30 @@ InstallMethod(
         return UnderlyingMorphismDatum ( morph );
     end);
 
+    #TODO: add if cancompute
     AddIsEqualForMorphisms( KarEnvC,
             function ( KarEnvC, morphism1, morphism2 )
                 local C, mor1, mor2;
                 C := UnderlyingCategory( KarEnvC );
                 mor1 := UnderlyingMorphismDatum ( morphism1 );
                 mor2 := UnderlyingMorphismDatum ( morphism2 );
-                return(IsEqualForMorphisms(C, mor1, mor2 ));
+                return IsEqualForMorphisms(C, mor1, mor2 );
             end );
 
         # Remember: these functions always assume that the morphisms are
         # indeed parallel.
+        #TODO: add if cancompute
     AddIsCongruentForMorphisms( KarEnvC,
         function ( KarEnvC, morphism1, morphism2 )
             local C, mor1, mor2;
             C := UnderlyingCategory( KarEnvC );
             f1 := UnderlyingMorphismDatum ( morphism1 );
             f2 := UnderlyingMorphismDatum ( morphism2 );
-            return(IsCongruentForMorphisms(C, f1, f2 ));
+            return IsCongruentForMorphisms(C, f1, f2 );
         end );
 
-    if CanCompute( C, "IsWellDefinedForMorphisms" ) then
+    #TODO: add IsWellDefined also for the source and target in the return of the underlying fuction
+    if CanCompute( C, "IsWellDefinedForMorphismsWithGivenSourceAndRange" ) and CanCompute( C, "IsCongruentForMorphisms" ) then
             AddIsWellDefinedForMorphisms( KarEnvC,
                 function ( KarEnvC, f )
                     local C, f_l, s_l, t_l;
@@ -136,4 +138,4 @@ InstallMethod(
 
 
 
-end)
+end);
