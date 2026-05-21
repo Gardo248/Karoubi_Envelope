@@ -10,7 +10,8 @@ DeclareCategory("IsKaroubiObject",
 DeclareCategory("IsKaroubiMorphism",
                 IsCapCategoryMorphism);
 
-
+DeclareAttribute( "KaroubiEnvelope",
+                IsCapCategory );
 
 DeclareAttribute("UnderlyingCategory",
                 IsKaroubiEnvelope);

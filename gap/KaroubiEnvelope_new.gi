@@ -1,4 +1,4 @@
-InstallMethod(
+InstallMethod( KaroubiEnvelope,
     "for a CAP category",
     [IsCapCategory],
     function ( C )
@@ -6,6 +6,7 @@ InstallMethod(
 
     KarEnvC := CreateCapCategoryWithDataTypes(
         Concatenation("KaroubiEnvelope(", Name(C), ")" ),
+        IsKaroubiEnvelope,
         IsKaroubiObject,
         IsKaroubiMorphism,
         IsCapCategoryTwoCell,
@@ -20,7 +21,7 @@ InstallMethod(
     #Q: Should I eliminate the datum of the source of the idempotent? Perhaps turn it into an operation.  
     AddObjectConstructor(KarEnvC,
         function(KarEnvC, idempotent)
-        return CreateCapCategoryObjectWithAttributes( KarEnvC, IdempotentDatum, idempotent, UnderlyingSourceOfIdempotent, Source(idempotent) )
+        return CreateCapCategoryObjectWithAttributes( KarEnvC, IdempotentDatum, idempotent, UnderlyingSourceOfIdempotent, Source(idempotent) );
     end);
 
     AddObjectDatum(KarEnvC,
@@ -51,7 +52,7 @@ InstallMethod(
     #The point is tha Cap is functional and so I have to assure that equal inputs gives equal outputs!
     AddIsEqualForObjects( KarEnvC,
             function ( KarEnvC, obj1, obj2 )
-                local KarEnvC, l1, l2;
+                local C, e1, e2;
                 C := UnderlyingCategory( KarEnvC );
                 e1 := IdempotentDatum( obj1 );
                 e2 := IdempotentDatum( obj2 );
@@ -85,7 +86,7 @@ InstallMethod(
         #TODO: add if cancompute
     AddIsCongruentForMorphisms( KarEnvC,
         function ( KarEnvC, morphism1, morphism2 )
-            local C, mor1, mor2;
+            local C, f1, f2;
             C := UnderlyingCategory( KarEnvC );
             f1 := UnderlyingMorphismDatum ( morphism1 );
             f2 := UnderlyingMorphismDatum ( morphism2 );
@@ -96,8 +97,8 @@ InstallMethod(
     if CanCompute( C, "IsWellDefinedForMorphismsWithGivenSourceAndRange" ) and CanCompute( C, "IsCongruentForMorphisms" ) then
             AddIsWellDefinedForMorphisms( KarEnvC,
                 function ( KarEnvC, f )
-                    local C, f_l, s_l, t_l;
-                    C := UnderlyingCategory( IC );
+                    local C, f_u, s_u, t_u, e_s, e_t;
+                    C := UnderlyingCategory( KarEnvC );
                     f_u := UnderlyingMorphismDatum( f );
                     e_s := IdempotentDatum( Source( f ) );
                     e_t := IdempotentDatum( Target ( f ) );
@@ -137,5 +138,5 @@ InstallMethod(
 
 
 
-
+return KarEnvC;
 end);

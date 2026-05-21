@@ -3,15 +3,14 @@ LoadPackage( "CAP", false );
 LoadPackage( "LinearAlgebraForCAP", false );
 
 #LoadPackage("KaroubiEnvelope");
-Read("../gap/KaroubiEnvelope.gd");
-Read("../gap/KaroubiEnvelope.gi");
+Read("../gap/KaroubiEnvelope_new.gd");
+Read("../gap/KaroubiEnvelope_new.gi");
 
 Q := HomalgFieldOfRationals();
 
 underlying_category := MatrixCategory( Q );
 
 kar := KaroubiEnvelope( underlying_category );
-
 
 V := VectorSpaceObject( 2, Q );
 
