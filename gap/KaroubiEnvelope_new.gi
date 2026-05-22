@@ -82,7 +82,7 @@ InstallMethod( KaroubiEnvelope,
                     mor2 := UnderlyingMorphismDatum ( morphism2 );
                     return IsEqualForMorphisms(C, mor1, mor2 );
                 end );
-    fi 
+    fi;
     
         # Remember: these functions always assume that the morphisms are
         # indeed parallel.
@@ -95,7 +95,7 @@ InstallMethod( KaroubiEnvelope,
                 f2 := UnderlyingMorphismDatum ( morphism2 );
                 return IsCongruentForMorphisms(C, f1, f2 );
             end );
-    fi 
+    fi;
 
     if CanCompute( C, "IsWellDefinedForMorphismsWithGivenSourceAndRange" ) and CanCompute( C, "IsCongruentForMorphisms" ) and CanCompute( C, "IsWellDefinedForObjects" ) then
             AddIsWellDefinedForMorphisms( KarEnvC,
