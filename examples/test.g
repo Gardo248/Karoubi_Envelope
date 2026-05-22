@@ -17,7 +17,7 @@ V := VectorSpaceObject( 2, Q );
 endo := VectorSpaceMorphism( V, HomalgMatrix( [ [ 0, 1 ], [ 1, 0 ] ], 2, 2, Q ), V );
 
 # not valid because endo is not an idempotent
-Vendo := KaroubiObject( endo );
+Vendo :=  endo / kar ;
 IsWellDefinedForObjects(Vendo);
 # false
 

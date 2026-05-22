@@ -20,12 +20,14 @@ InstallMethod( KaroubiEnvelope,
     #Q: Is this a good definition? I will postpone the check that the morphism is an idempotent inside the IsWellDefinedForObject.
     #Q: Should I eliminate the datum of the source of the idempotent? Perhaps turn it into an operation.  
     AddObjectConstructor(KarEnvC,
-        function(KarEnvC, idempotent)
-        return CreateCapCategoryObjectWithAttributes( KarEnvC, IdempotentDatum, idempotent, UnderlyingSourceOfIdempotent, Source(idempotent) );
+        function(cat, idempotent)
+        return CreateCapCategoryObjectWithAttributes( cat, IdempotentDatum, idempotent );
+        # option with the datum of the source inside the object datum:
+        # return CreateCapCategoryObjectWithAttributes( cat, IdempotentDatum, idempotent, UnderlyingSourceOfIdempotent, Source(idempotent) );
     end);
 
     AddObjectDatum(KarEnvC,
-        function (KarEnvC, obj)
+        function (cat, obj)
         return IdempotentDatum ( obj );
     end);
 
@@ -39,9 +41,9 @@ InstallMethod( KaroubiEnvelope,
 
     if CanCompute( C, "IsCongruentForMorphisms" ) then
         AddIsWellDefinedForObjects( KarEnvC,
-            function ( KarEnvC, obj )
+            function ( cat, obj )
                 local C, e;
-                C := UnderlyingCategory( KarEnvC );
+                C := UnderlyingCategory( cat );
                 e := IdempotentDatum ( obj );
 
                 return IsCongruentForMorphisms( C, PreCompose( C, e, e ), e );
@@ -51,9 +53,9 @@ InstallMethod( KaroubiEnvelope,
     #Q: is it better to use IsCongruentForMorphisms or IsEqualForMorphisms?
     #The point is tha Cap is functional and so I have to assure that equal inputs gives equal outputs!
     AddIsEqualForObjects( KarEnvC,
-            function ( KarEnvC, obj1, obj2 )
+            function ( cat, obj1, obj2 )
                 local C, e1, e2;
-                C := UnderlyingCategory( KarEnvC );
+                C := UnderlyingCategory( cat );
                 e1 := IdempotentDatum( obj1 );
                 e2 := IdempotentDatum( obj2 );
 
@@ -61,21 +63,21 @@ InstallMethod( KaroubiEnvelope,
             end );
  
     AddMorphismConstructor( KarEnvC,
-            function ( KarEnvC, s, morph, t )
+            function ( cat, s, morph, t )
 
-                return CreateCapCategoryMorphismWithAttributes( KarEnvC, s, t, UnderlyingMorphismDatum, morph);
+                return CreateCapCategoryMorphismWithAttributes( cat, s, t, UnderlyingMorphismDatum, morph);
             end );
 
     AddMorphismDatum(KarEnvC,
-        function (KarEnvC, morph)
+        function (cat, morph)
         return UnderlyingMorphismDatum ( morph );
     end);
 
     #TODO: add if cancompute
     AddIsEqualForMorphisms( KarEnvC,
-            function ( KarEnvC, morphism1, morphism2 )
+            function ( cat, morphism1, morphism2 )
                 local C, mor1, mor2;
-                C := UnderlyingCategory( KarEnvC );
+                C := UnderlyingCategory( cat );
                 mor1 := UnderlyingMorphismDatum ( morphism1 );
                 mor2 := UnderlyingMorphismDatum ( morphism2 );
                 return IsEqualForMorphisms(C, mor1, mor2 );
@@ -85,9 +87,9 @@ InstallMethod( KaroubiEnvelope,
         # indeed parallel.
         #TODO: add if cancompute
     AddIsCongruentForMorphisms( KarEnvC,
-        function ( KarEnvC, morphism1, morphism2 )
+        function ( cat, morphism1, morphism2 )
             local C, f1, f2;
-            C := UnderlyingCategory( KarEnvC );
+            C := UnderlyingCategory( cat );
             f1 := UnderlyingMorphismDatum ( morphism1 );
             f2 := UnderlyingMorphismDatum ( morphism2 );
             return IsCongruentForMorphisms(C, f1, f2 );
@@ -96,7 +98,7 @@ InstallMethod( KaroubiEnvelope,
     #TODO: add IsWellDefined also for the source and target in the return of the underlying fuction
     if CanCompute( C, "IsWellDefinedForMorphismsWithGivenSourceAndRange" ) and CanCompute( C, "IsCongruentForMorphisms" ) then
             AddIsWellDefinedForMorphisms( KarEnvC,
-                function ( KarEnvC, f )
+                function ( cat, f )
                     local C, f_u, s_u, t_u, e_s, e_t;
                     C := UnderlyingCategory( KarEnvC );
                     f_u := UnderlyingMorphismDatum( f );
@@ -109,24 +111,24 @@ InstallMethod( KaroubiEnvelope,
         fi;
 
     AddIdentityMorphism( KarEnvC,
-            function ( KarEnvC, object )
+            function ( cat, object )
                 local C, idempotent;
-                C := UnderlyingCategory( KarEnvC );
+                C := UnderlyingCategory( cat );
                 idempotent := IdempotentDatum( object ) ;
-            return MorphismConstructor( KarEnvC, object, idempotent, object );
+            return MorphismConstructor( cat, object, idempotent, object );
             end );
 
     AddPreCompose( KarEnvC,
-            function ( KarEnvC, f, g )
+            function ( cat, f, g )
                 #    f     g
                 # x --> y --> z
                 local C, x, z, f_under, g_under;
-                C := UnderlyingCategory( KarEnvC );
+                C := UnderlyingCategory( cat );
                 x := Source( f ) ;
                 z := Target( g );
                 f_under := UnderlyingMorphismDatum( f );
                 g_under := UnderlyingMorphismDatum( g );
-                return MorphismConstructor( KarEnvC, x, PreCompose( C, f_under, g_under ), z );
+                return MorphismConstructor( cat, x, PreCompose( C, f_under, g_under ), z );
             end );
 
     #Q: do I have to add manually: if CanCompute... then AddIsMonomorphism, AddIsEpimorphism, AddIsIsomorphism, AddIsSplitMonomorphism, AddInverseMorphism,  AddCoproduct, AddInitialObject, AddTerminalObject, AddDirectProduct, ecc...
