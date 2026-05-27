@@ -150,7 +150,7 @@ InstallMethod( KaroubiEnvelope,
         e_x := IdempotentDatum( x );
         e_y := IdempotentDatum( y );
         return ObjectConstructor( cat, TensorProduct(e_x, e_y) );
-        end )
+        end );
     fi;
 
     if CanCompute( C, "TensorProducOnMorphisms" ) then
@@ -158,11 +158,14 @@ InstallMethod( KaroubiEnvelope,
         function (cat, phi1, phi2 )
         local C, phi1_under, phi2_under, s1, s2, t1, t2;
         C := UnderlyingCategory( cat );
-        s1 :=
+        s1 := Source( phi1 );
+        s2 := Source( phi2 );
+        t1 := Target( phi1 );
+        t2 := Target( phi2 );
         phi1_under := UnderlyingMorphismDatum( phi1 );
         phi2_under := UnderlyingMorphismDatum( phi2 );
         return MorphismConstructor( cat, TensorProduct( s1, s2 ), TensorProduct( phi1_under, phi2_under ), TensorProduct ( t1, t2 ) );
-        end )
+        end );
     fi;    
 
 
