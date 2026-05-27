@@ -59,7 +59,7 @@ InstallMethod( KaroubiEnvelope,
                 e1 := IdempotentDatum( obj1 );
                 e2 := IdempotentDatum( obj2 );
 
-                return IsCongruentForMorphisms( C, e1, e2 );
+                return IsEqualForMorphisms( C, e1, e2 );
             end );
  
     AddMorphismConstructor( KarEnvC,
@@ -139,6 +139,31 @@ InstallMethod( KaroubiEnvelope,
     #Q:Then he add manually a lot of methods lime kernelobject, zeroObject, KernelLift
     #Q: should I add something like the essential image of the underlying category? Should I add the formal splitting of an element in this essential image? Should I implement a proof (maybe in the example file) that in KarEnvC all the idempotent splits?
 
+    #note: from now on we implement the preservation of structures of the underlying category C, I will not suppose that the upper category has the structure, I always ask if "the underlying cat has the structure S" then I define S over KarEnvC
+
+    #preservation of monoidal structure
+    if CanCompute( C, "TensorProducOnObjects" ) then
+        AddTensorProductOnObjects( KarEnvC,
+        function (cat, x, y )
+        local C, e_x, e_y;
+        C := UnderlyingCategory( cat );
+        e_x := IdempotentDatum( x );
+        e_y := IdempotentDatum( y );
+        return ObjectConstructor( cat, TensorProduct(e_x, e_y) );
+        end )
+    fi;
+
+    if CanCompute( C, "TensorProducOnMorphisms" ) then
+        AddTensorProductOnMorphisms( KarEnvC,
+        function (cat, phi1, phi2 )
+        local C, phi1_under, phi2_under, s1, s2, t1, t2;
+        C := UnderlyingCategory( cat );
+        s1 :=
+        phi1_under := UnderlyingMorphismDatum( phi1 );
+        phi2_under := UnderlyingMorphismDatum( phi2 );
+        return MorphismConstructor( cat, TensorProduct( s1, s2 ), TensorProduct( phi1_under, phi2_under ), TensorProduct ( t1, t2 ) );
+        end )
+    fi;    
 
 
 return KarEnvC;
