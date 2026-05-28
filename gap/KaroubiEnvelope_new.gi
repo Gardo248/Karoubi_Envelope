@@ -140,9 +140,10 @@ InstallMethod( KaroubiEnvelope,
     #Q: should I add something like the essential image of the underlying category? Should I add the formal splitting of an element in this essential image? Should I implement a proof (maybe in the example file) that in KarEnvC all the idempotent splits?
 
     #note: from now on we implement the preservation of structures of the underlying category C, I will not suppose that the upper category has the structure, I always ask if "the underlying cat has the structure S" then I define S over KarEnvC
+    #Q: is it correct to ask if CanCompute( C, "TensorProductOnObjects" )? Should I ask something like if C "belongs" to IsMonoidalCategory then ...
 
     #preservation of monoidal structure
-    if CanCompute( C, "TensorProducOnObjects" ) then
+    if CanCompute( C, "TensorProductOnObjects" ) then
         AddTensorProductOnObjects( KarEnvC,
         function (cat, x, y )
         local C, e_x, e_y;
@@ -153,7 +154,7 @@ InstallMethod( KaroubiEnvelope,
         end );
     fi;
 
-    if CanCompute( C, "TensorProducOnMorphisms" ) then
+    if CanCompute( C, "TensorProductOnMorphisms" ) then
         AddTensorProductOnMorphisms( KarEnvC,
         function (cat, phi1, phi2 )
         local C, phi1_under, phi2_under, s1, s2, t1, t2;
@@ -166,7 +167,9 @@ InstallMethod( KaroubiEnvelope,
         phi2_under := UnderlyingMorphismDatum( phi2 );
         return MorphismConstructor( cat, TensorProduct( s1, s2 ), TensorProduct( phi1_under, phi2_under ), TensorProduct ( t1, t2 ) );
         end );
-    fi;    
+    fi;
+
+
 
 
 return KarEnvC;
