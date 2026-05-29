@@ -28,3 +28,5 @@ iA := IdentityMorphism(V) / kar;
 eA := e / kar;
 fA := f / kar;
 phi := MorphismConstructor(eA, PreCompose(f, e), fA);
+
+Display( CanCompute( kar, "TensorProductOnObjects" ) );

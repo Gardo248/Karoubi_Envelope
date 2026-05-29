@@ -143,7 +143,7 @@ InstallMethod( KaroubiEnvelope,
     #Q: is it correct to ask if CanCompute( C, "TensorProductOnObjects" )? Should I ask something like if C "belongs" to IsMonoidalCategory then ...
 
     #preservation of monoidal structure
-    if CanCompute( C, "TensorProductOnObjects" ) then
+    if CanCompute( C, "TensorProductOnMorphisms" ) then
         AddTensorProductOnObjects( KarEnvC,
         function (cat, x, y )
         local C, e_x, e_y;
@@ -169,7 +169,15 @@ InstallMethod( KaroubiEnvelope,
         end );
     fi;
 
+    #Q: how can I find the documentation related to a specific structure such as AbCategory and so on?
 
+    #preservation of pre-additive structure
+    #Q: Is it enough to build the structure of sums and differences of morphisms? Do I have to define the zero object and the zero morphism? Is the zero morphism a universal morphism (i.e. the zero morph in the zero obj) or it is a "contructor" such that for every two objects build the zero morph between the two objcets?
+    #Q: do I have to say somehow that, if C is preadditive, then KarEnvC is preadditive? How do I do this thing?
+    #Q: we found the RightUnitor and the LeftUnitor but we didn't find the associator
+    if IsAbCategory( C ) then
+        
+    fi;
 
 
 return KarEnvC;
