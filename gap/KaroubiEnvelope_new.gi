@@ -134,15 +134,23 @@ InstallMethod( KaroubiEnvelope,
 
     #Q: do I have to add manually: if CanCompute... then AddIsMonomorphism, AddIsEpimorphism, AddIsIsomorphism, AddIsSplitMonomorphism, AddInverseMorphism,  AddCoproduct, AddInitialObject, AddTerminalObject, AddDirectProduct, ecc...
 
-    #Q: there is this line of code inside the old file, what do it does? Do I have to add it, in some other form?
-    #category_weight_list := category!.derivations_weight_list;
-    #Q:Then he add manually a lot of methods lime kernelobject, zeroObject, KernelLift
     #Q: should I add something like the essential image of the underlying category? Should I add the formal splitting of an element in this essential image? Should I implement a proof (maybe in the example file) that in KarEnvC all the idempotent splits?
 
     #note: from now on we implement the preservation of structures of the underlying category C, I will not suppose that the upper category has the structure, I always ask if "the underlying cat has the structure S" then I define S over KarEnvC
-    #Q: is it correct to ask if CanCompute( C, "TensorProductOnObjects" )? Should I ask something like if C "belongs" to IsMonoidalCategory then ...
+    #Q: is it correct to ask if CanCompute( C, "TensorProductOnObjects" )? Should I ask something like if IsMonoidalCategory(C) then ..., maybe in one external if
 
     #preservation of monoidal structure
+    if CanCompute( C, "TensorUnit" ) then 
+        AddTensorUnit( KarEnvC,
+            function( cat )
+            local C, unit, id_unit;
+            C := UnderlyingCategory( cat );
+            unit := TensorUnit( C );
+            id_unit := IdentityMorphism( unit );
+            return ObjectConstructor( cat, id_unit );
+        end );
+    fi; 
+
     if CanCompute( C, "TensorProductOnMorphisms" ) then
         AddTensorProductOnObjects( KarEnvC,
         function (cat, x, y )
@@ -152,9 +160,7 @@ InstallMethod( KaroubiEnvelope,
         e_y := IdempotentDatum( y );
         return ObjectConstructor( cat, TensorProduct(e_x, e_y) );
         end );
-    fi;
 
-    if CanCompute( C, "TensorProductOnMorphisms" ) then
         AddTensorProductOnMorphisms( KarEnvC,
         function (cat, phi1, phi2 )
         local C, phi1_under, phi2_under, s1, s2, t1, t2;
