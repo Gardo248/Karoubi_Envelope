@@ -136,8 +136,9 @@ InstallMethod( KaroubiEnvelope,
     #note: from now on we implement the preservation of structures of the underlying category C, I will not suppose that the upper category has the structure, I always ask if "the underlying cat has the structure S" then I define S over KarEnvC
     #Q: is it correct to ask if CanCompute( C, "TensorProductOnObjects" )? Should I ask something like if IsMonoidalCategory(C) then ..., maybe in one external if
 
-    #preservation of monoidal structure
+    #note: preservation of monoidal structure
     if CanCompute( C, "TensorUnit" ) then 
+        #note: tensor unit
         AddTensorUnit( KarEnvC,
         function( cat )
             local C, unit, id_unit;
@@ -173,6 +174,66 @@ InstallMethod( KaroubiEnvelope,
             return MorphismConstructor( cat, TensorProduct( s1, s2 ), TensorProduct( phi1_under, phi2_under ), TensorProduct ( t1, t2 ) );
         end );
     fi;
+
+    #note: left unitor
+    if CanCompute( C, "LeftUnitor") then
+        AddLeftUnitor( KarEnvC, 
+        function( cat, x )
+            local C, Karunit, e_x, under_x, leftunitor_under;
+            C := UnderlyingCategory( cat );
+            Karunit := TensorUnit( cat );
+            e_x := IdempotentDatum( x );
+            under_x := Source(e_x);
+            leftunitor_under := LeftUnitor( under_x );
+            return MorphismConstructor( cat, TensorProductOnObjects( Karunit, x ), leftunitor_under, x );
+        end );
+    fi;
+
+    #note: inverse of left unitor
+    if CanCompute( C, "LeftUnitorInverse") then
+        AddLeftUnitorInverse( KarEnvC, 
+        function( cat, x )
+            local C, Karunit, e_x, under_x, leftunitorinv_under;
+            C := UnderlyingCategory( cat );
+            Karunit := TensorUnit( cat );
+            e_x := IdempotentDatum( x );
+            under_x := Source(e_x);
+            leftunitorinv_under := LeftUnitorInverse( under_x );
+            return MorphismConstructor( cat, x, leftunitorinv_under, TensorProductOnObjects( Karunit, x ) );
+        end );
+    fi;
+
+    #note: right unitor
+    if CanCompute( C, "RightUnitor") then
+        AddRightUnitor( KarEnvC, 
+        function( cat, x )
+            local C, Karunit, e_x, under_x, rightunitor_under;
+            C := UnderlyingCategory( cat );
+            Karunit := TensorUnit( cat );
+            e_x := IdempotentDatum( x );
+            under_x := Source(e_x);
+            rightunitor_under := RightUnitor( under_x );
+            return MorphismConstructor( cat, TensorProductOnObjects( x, Karunit ), rightunitor_under, x );
+        end );
+    fi;
+
+    #note: inverse of right unitor
+    if CanCompute( C, "RightUnitorInverse") then
+        AddRightUnitorInverse( KarEnvC, 
+        function( cat, x )
+            local C, Karunit, e_x, under_x, rightunitorinv_under;
+            C := UnderlyingCategory( cat );
+            Karunit := TensorUnit( cat );
+            e_x := IdempotentDatum( x );
+            under_x := Source(e_x);
+            rightunitorinv_under := RightUnitorInverse( under_x );
+            return MorphismConstructor( cat, x, rightunitorinv_under, TensorProductOnObjects( x, Karunit ) );
+        end );
+    fi;
+
+    
+
+
 
     #Q: how can I find the documentation related to a specific structure such as AbCategory and so on?
 
@@ -220,7 +281,7 @@ InstallMethod( KaroubiEnvelope,
                 phi_under := UnderlyingMorphismDatum( phi );
                 return MorphismConstructor( cat, s, AdditiveInverseForMorphism( phi1_under, phi2_under ), t );
             end)
-        fi; 
+        fi;
     fi;
 
 
