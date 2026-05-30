@@ -314,6 +314,8 @@ InstallMethod( KaroubiEnvelope,
         fi;
     fi;
 
+    #Q: do I have to add something for the additive structure? If C is an additive category, then the Karobi envelope is an iteration, it is not more skeletal maybe, indeed you are formally adding an object for each idempotent, but you already have direct summand in the additive category, so all the objects in the karoubi envelope is isomorphic to an element in the essential image of the functor
+
 
 return KarEnvC;
 end);
