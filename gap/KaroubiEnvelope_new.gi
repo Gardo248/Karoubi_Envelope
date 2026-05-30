@@ -185,7 +185,7 @@ InstallMethod( KaroubiEnvelope,
             e_x := IdempotentDatum( x );
             under_x := Source(e_x);
             leftunitor_under := LeftUnitor( under_x );
-            return MorphismConstructor( cat, TensorProductOnObjects( Karunit, x ), leftunitor_under, x );
+            return MorphismConstructor( cat, TensorProduct( Karunit, x ), leftunitor_under, x );
         end );
     fi;
 
@@ -199,7 +199,7 @@ InstallMethod( KaroubiEnvelope,
             e_x := IdempotentDatum( x );
             under_x := Source(e_x);
             leftunitorinv_under := LeftUnitorInverse( under_x );
-            return MorphismConstructor( cat, x, leftunitorinv_under, TensorProductOnObjects( Karunit, x ) );
+            return MorphismConstructor( cat, x, leftunitorinv_under, TensorProduct( Karunit, x ) );
         end );
     fi;
 
@@ -213,7 +213,7 @@ InstallMethod( KaroubiEnvelope,
             e_x := IdempotentDatum( x );
             under_x := Source(e_x);
             rightunitor_under := RightUnitor( under_x );
-            return MorphismConstructor( cat, TensorProductOnObjects( x, Karunit ), rightunitor_under, x );
+            return MorphismConstructor( cat, TensorProduct( x, Karunit ), rightunitor_under, x );
         end );
     fi;
 
@@ -227,13 +227,43 @@ InstallMethod( KaroubiEnvelope,
             e_x := IdempotentDatum( x );
             under_x := Source(e_x);
             rightunitorinv_under := RightUnitorInverse( under_x );
-            return MorphismConstructor( cat, x, rightunitorinv_under, TensorProductOnObjects( x, Karunit ) );
+            return MorphismConstructor( cat, x, rightunitorinv_under, TensorProduct( x, Karunit ) );
         end );
     fi;
 
-    
+    #note: associator from right to left
+    if CanCompute( C, "AssociatorRightToLeft" ) then
+        AddAssociatorRightToLeft( cat, 
+        function(cat, x, y, z)
+            local C, e_x, e_y, e_z, under_x, under_y, under_z;
+            C := UnderlyingCategory( cat );
+            e_x := IdempotentDatum( x );
+            under_x := Source( e_x );
+            e_y := IdempotentDatum( y );
+            under_y := Source( e_y );
+            e_z := IdempotentDatum( z );
+            under_z := Source( e_z );
+            return MorphismConstructor( cat, TensorProduct( x, TensorProduct( y, z ) ), AssociatorRightToLeft( under_x, under_y, under_z ), TensorProduct( TensorProduct( a, b ), c ) );
+        end );
+    fi;
 
+    #note: associator from left to right
+    if CanCompute( C, "AssociatorLeftToRight" ) then
+        AddAssociatorLeftToRight( cat, 
+        function(cat, x, y, z)
+            local C, e_x, e_y, e_z, under_x, under_y, under_z;
+            C := UnderlyingCategory( cat );
+            e_x := IdempotentDatum( x );
+            under_x := Source( e_x );
+            e_y := IdempotentDatum( y );
+            under_y := Source( e_y );
+            e_z := IdempotentDatum( z );
+            under_z := Source( e_z );
+            return MorphismConstructor( cat, TensorProduct( TensorProduct( a, b ), c ), AssociatorLeftToRight( under_x, under_y, under_z ), TensorProduct( x, TensorProduct( y, z ) ) );
+        end );
+    fi;
 
+    #TODO: check in example/test file that righ unitor and its inverse are effectively inverses, same for the left one
 
     #Q: how can I find the documentation related to a specific structure such as AbCategory and so on?
 
