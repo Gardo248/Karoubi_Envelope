@@ -31,17 +31,38 @@ IsEqualForObjects( iA, i / kar );
 
 eA := e / kar;
 fA := f / kar;
+eA = fA;
+#false
+
 phi := MorphismConstructor( fA, PreCompose( f, e ), eA );
 phidatum := MorphismDatum( phi );
-IsEqualForMorphisms( phidatum, Precompose( f, e ) );
-IsEqualForMorphisms( phidatum, Precompose( f, e ) );
+
+IsEqualForMorphisms( phi, MorphismConstructor( fA, phidatum, eA ) );
+#true
+
 psi := MorphismConstructor( iA, f, fA );
 
 IsWellDefinedForMorphisms( phi );
 #true
 IsWellDefinedForMorphisms( PreCompose( psi, phi ) );
 #true
+IsCongruentForMorphisms( psi, PreCompose( psi, IdentityMorphism( fA ) ) );
+#true
 
+one := TensorUnit( kar );
+
+IsEqualForObjects( fA, TensorProduct( fA, one ) );
+#true
+IsCongruentForMorphisms( psi, TensorProduct( IdentityMorphism( one ), psi ) );
+#true
+Display( TensorProduct( psi, phi ) );
+#a morphism in KaroubiEnvelope(Category of matices over Q)
+Display( MorphismDatum( TensorProduct( psi, phi ) ) );
+#[ [ 0, 0, 0, 0 ],
+    [ 0, 0, 0, 0 ],
+]
+Display( Source( TensorProduct( psi, phi ) ) );
+#an object in KaroubiEnvelope(Category of matrices over Q)
 
 
 CanCompute( kar, "TensorProductOnObjects" );
