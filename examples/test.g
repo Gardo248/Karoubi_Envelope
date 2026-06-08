@@ -49,20 +49,35 @@ IsWellDefinedForMorphisms( PreCompose( psi, phi ) );
 IsCongruentForMorphisms( psi, PreCompose( psi, IdentityMorphism( fA ) ) );
 #true
 
+CanCompute( kar, "TensorProductOnObjects" );
+#true
+
 one := TensorUnit( kar );
 
 IsEqualForObjects( fA, TensorProduct( fA, one ) );
 #true
+
 IsCongruentForMorphisms( psi, TensorProduct( IdentityMorphism( one ), psi ) );
 #true
-Display( TensorProduct( psi, phi ) );
+
+TensorProduct( psi, phi );
 #a morphism in KaroubiEnvelope(Category of matices over Q)
-Display( MorphismDatum( TensorProduct( psi, phi ) ) );
+
+MorphismDatum( TensorProduct( psi, phi ) );
 #[ [ 0, 0, 0, 0 ],
-    [ 0, 0, 0, 0 ],
-]
-Display( Source( TensorProduct( psi, phi ) ) );
+#  [ 0, 0, 0, 0 ],
+#  [ 0, 0, 0, 0 ],
+#  [ 1, 1, 1, 1 ]
+#]
+# A morphism in Category of matrices over Q
+
+Source( TensorProduct( psi, phi ) );
 #an object in KaroubiEnvelope(Category of matrices over Q)
 
+IsEqualForMorphisms( TensorProduct( i, f ), IdempotentDatum( Source( TensorProduct( psi, phi ) ) ) );
+#true
 
-CanCompute( kar, "TensorProductOnObjects" );
+
+
+
+
