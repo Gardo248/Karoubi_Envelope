@@ -42,11 +42,12 @@ IsEqualForMorphisms( phi, MorphismConstructor( fA, phidatum, eA ) );
 
 psi := MorphismConstructor( iA, f, fA );
 
-IsWellDefinedForMorphisms( phi );
+IsWellDefined( phi );
 #true
-IsWellDefinedForMorphisms( PreCompose( psi, phi ) );
+IsWellDefined( PreCompose( psi, phi ) );
 #true
-IsCongruentForMorphisms( psi, PreCompose( psi, IdentityMorphism( fA ) ) );
+psi = PreCompose( psi, IdentityMorphism( fA ) );
+#same as IsCongruentForMorphisms( psi, PreCompose( psi, IdentityMorphism( fA ) ) );
 #true
 
 CanCompute( kar, "TensorProductOnObjects" );
@@ -75,6 +76,11 @@ Source( TensorProduct( psi, phi ) );
 #an object in KaroubiEnvelope(Category of matrices over Q)
 
 IsEqualForMorphisms( TensorProduct( i, f ), IdempotentDatum( Source( TensorProduct( psi, phi ) ) ) );
+#true
+
+#TODO: add examples with unitors and associators
+
+CanCompute( kar, "ZeroMorphism");
 #true
 
 

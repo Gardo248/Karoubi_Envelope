@@ -20,14 +20,14 @@ InstallMethod( KaroubiEnvelope,
     #Q: Is this a good definition? I will postpone the check that the morphism is an idempotent inside the IsWellDefinedForObject.
     #Q: Should I eliminate the datum of the source of the idempotent? Perhaps turn it into an operation.  
     AddObjectConstructor( KarEnvC,
-        function( cat, idempotent )
-        return CreateCapCategoryObjectWithAttributes( cat, IdempotentDatum, idempotent );
+        function( KarEnvC, idempotent )
+        return CreateCapCategoryObjectWithAttributes( KarEnvC, IdempotentDatum, idempotent );
         # option with the datum of the source inside the object datum:
-        # return CreateCapCategoryObjectWithAttributes( cat, IdempotentDatum, idempotent, UnderlyingSourceOfIdempotent, Source(idempotent) );
+        # return CreateCapCategoryObjectWithAttributes( KarEnvC, IdempotentDatum, idempotent, UnderlyingSourceOfIdempotent, Source(idempotent) );
     end );
 
     AddObjectDatum( KarEnvC,
-        function ( cat, obj )
+        function ( KarEnvC, obj )
             return IdempotentDatum ( obj );
     end );
 
@@ -41,9 +41,9 @@ InstallMethod( KaroubiEnvelope,
 
     if CanCompute( C, "IsCongruentForMorphisms" ) then
         AddIsWellDefinedForObjects( KarEnvC,
-            function ( cat, obj )
+            function ( KarEnvC, obj )
                 local C, e;
-                C := UnderlyingCategory( cat );
+                C := UnderlyingCategory( KarEnvC );
                 e := IdempotentDatum ( obj );
                 return IsCongruentForMorphisms( C, PreCompose( C, e, e ), e );
             end );
@@ -52,32 +52,32 @@ InstallMethod( KaroubiEnvelope,
     #Q: is it better to use IsCongruentForMorphisms or IsEqualForMorphisms?
     #The point is that Cap is functional and so I have to assure that equal inputs gives equal outputs!
     AddIsEqualForObjects( KarEnvC,
-            function ( cat, obj1, obj2 )
+            function ( KarEnvC, obj1, obj2 )
                 local C, e1, e2;
-                C := UnderlyingCategory( cat );
+                C := UnderlyingCategory( KarEnvC );
                 e1 := IdempotentDatum( obj1 );
                 e2 := IdempotentDatum( obj2 );
                 return IsEqualForMorphisms( C, e1, e2 );
             end );
  
     AddMorphismConstructor( KarEnvC,
-            function ( cat, s, morph, t )
-                return CreateCapCategoryMorphismWithAttributes( cat, s, t, UnderlyingMorphismDatum, morph );
+            function ( KarEnvC, s, morph, t )
+                return CreateCapCategoryMorphismWithAttributes( KarEnvC, s, t, UnderlyingMorphismDatum, morph );
             end );
 
     AddMorphismDatum( KarEnvC,
-        function ( cat, morph )
+        function ( KarEnvC, morph )
             return UnderlyingMorphismDatum ( morph );
     end );
 
     if CanCompute( C, "IsEqualForMorphisms" ) then
         AddIsEqualForMorphisms( KarEnvC,
-                function ( cat, morphism1, morphism2 )
+                function ( KarEnvC, morphism1, morphism2 )
                     local C, mor1, mor2;
-                    C := UnderlyingCategory( cat );
+                    C := UnderlyingCategory( KarEnvC );
                     mor1 := UnderlyingMorphismDatum ( morphism1 );
                     mor2 := UnderlyingMorphismDatum ( morphism2 );
-                    return IsEqualForMorphisms(C, mor1, mor2 );
+                    return IsEqualForMorphisms( C, mor1, mor2 );
                 end );
     fi;
     
@@ -85,9 +85,9 @@ InstallMethod( KaroubiEnvelope,
         # indeed parallel.
     if CanCompute( C, "IsCongruentForMorphisms" ) then
         AddIsCongruentForMorphisms( KarEnvC,
-            function ( cat, morphism1, morphism2 )
+            function ( KarEnvC, morphism1, morphism2 )
                 local C, f1, f2;
-                C := UnderlyingCategory( cat );
+                C := UnderlyingCategory( KarEnvC );
                 f1 := UnderlyingMorphismDatum ( morphism1 );
                 f2 := UnderlyingMorphismDatum ( morphism2 );
                 return IsCongruentForMorphisms( C, f1, f2 );
@@ -96,7 +96,7 @@ InstallMethod( KaroubiEnvelope,
 
     if CanCompute( C, "IsWellDefinedForMorphismsWithGivenSourceAndRange" ) and CanCompute( C, "IsCongruentForMorphisms" ) and CanCompute( C, "IsWellDefinedForObjects" ) then
             AddIsWellDefinedForMorphisms( KarEnvC,
-                function ( cat, f )
+                function ( KarEnvC, f )
                     local C, f_u, s_u, t_u, e_s, e_t;
                     C := UnderlyingCategory( KarEnvC );
                     f_u := UnderlyingMorphismDatum( f );
@@ -110,154 +110,154 @@ InstallMethod( KaroubiEnvelope,
         fi;
 
     AddIdentityMorphism( KarEnvC,
-            function ( cat, object )
+            function ( KarEnvC, object )
                 local C, idempotent;
-                C := UnderlyingCategory( cat );
+                C := UnderlyingCategory( KarEnvC );
                 idempotent := IdempotentDatum( object ) ;
-                return MorphismConstructor( cat, object, idempotent, object );
+                return MorphismConstructor( KarEnvC, object, idempotent, object );
             end );
 
     AddPreCompose( KarEnvC,
-            function ( cat, f, g )
+            function ( KarEnvC, f, g )
                 #    f     g
                 # x --> y --> z
                 local C, x, z, f_under, g_under;
-                C := UnderlyingCategory( cat );
+                C := UnderlyingCategory( KarEnvC );
                 x := Source( f ) ;
                 z := Target( g );
                 f_under := UnderlyingMorphismDatum( f );
                 g_under := UnderlyingMorphismDatum( g );
-                return MorphismConstructor( cat, x, PreCompose( C, f_under, g_under ), z );
+                return MorphismConstructor( KarEnvC, x, PreCompose( C, f_under, g_under ), z );
             end );
 
     #note: from now on we implement the preservation of structures of the underlying category C, I will not suppose that the upper category has the structure, I always ask if "the underlying cat has the structure S" then I define S over KarEnvC
 
     #Q: is it correct to ask if CanCompute( C, "TensorProductOnObjects" )? Should I ask something like if IsMonoidalCategory(C) then ..., maybe in one external if
 
+    if HasIsMonoidalCategory( C ) and IsMonoidalCategory( C ) then
+        SetIsMonoidalCategory( KarEnvC, true );
+    fi;
+
     #note: preservation of monoidal structure
     if CanCompute( C, "TensorUnit" ) then 
         #note: tensor unit
         AddTensorUnit( KarEnvC,
-        function( cat )
+        function( KarEnvC )
             local C, unit, id_unit;
-            C := UnderlyingCategory( cat );
+            C := UnderlyingCategory( KarEnvC );
             unit := TensorUnit( C );
-            id_unit := IdentityMorphism( unit );
-            return ObjectConstructor( cat, id_unit );
+            id_unit := IdentityMorphism( C, unit );
+            return ObjectConstructor( KarEnvC, id_unit );
         end );
     fi; 
 
     if CanCompute( C, "TensorProductOnMorphisms" ) then
         #note: tensor product on objects
         AddTensorProductOnObjects( KarEnvC,
-        function (cat, x, y )
+        function ( KarEnvC, x, y )
             local C, e_x, e_y;
-            C := UnderlyingCategory( cat );
+            C := UnderlyingCategory( KarEnvC );
             e_x := IdempotentDatum( x );
             e_y := IdempotentDatum( y );
-            return ObjectConstructor( cat, TensorProduct(e_x, e_y) );
+            return ObjectConstructor( KarEnvC, TensorProductOnMorphisms( C, e_x, e_y ) );
         end );
 
         #note: tensor product on morphisms
-        AddTensorProductOnMorphisms( KarEnvC,
-        function (cat, phi1, phi2 )
-            local C, phi1_under, phi2_under, s1, s2, t1, t2;
-            C := UnderlyingCategory( cat );
-            s1 := Source( phi1 );
-            s2 := Source( phi2 );
-            t1 := Target( phi1 );
-            t2 := Target( phi2 );
+        AddTensorProductOnMorphismsWithGivenTensorProducts( KarEnvC,
+        function ( KarEnvC, source, phi1, phi2, target )
+            local C, phi1_under, phi2_under;
+            C := UnderlyingCategory( KarEnvC );
             phi1_under := UnderlyingMorphismDatum( phi1 );
             phi2_under := UnderlyingMorphismDatum( phi2 );
-            return MorphismConstructor( cat, TensorProduct( s1, s2 ), TensorProduct( phi1_under, phi2_under ), TensorProduct ( t1, t2 ) );
+            return MorphismConstructor( KarEnvC, source, TensorProductOnMorphisms( C, phi1_under, phi2_under ), target );
         end );
     fi;
 
     #note: left unitor
     if CanCompute( C, "LeftUnitor") then
         AddLeftUnitor( KarEnvC, 
-        function( cat, x )
+        function( KarEnvC, x )
             local C, Karunit, e_x, under_x, leftunitor_under;
-            C := UnderlyingCategory( cat );
-            Karunit := TensorUnit( cat );
+            C := UnderlyingCategory( KarEnvC );
+            Karunit := TensorUnit( KarEnvC );
             e_x := IdempotentDatum( x );
             under_x := Source(e_x);
             leftunitor_under := LeftUnitor( under_x );
-            return MorphismConstructor( cat, TensorProduct( Karunit, x ), leftunitor_under, x );
+            return MorphismConstructor( KarEnvC, TensorProduct( Karunit, x ), leftunitor_under, x );
         end );
     fi;
 
     #note: inverse of left unitor
     if CanCompute( C, "LeftUnitorInverse") then
         AddLeftUnitorInverse( KarEnvC, 
-        function( cat, x )
+        function( KarEnvC, x )
             local C, Karunit, e_x, under_x, leftunitorinv_under;
-            C := UnderlyingCategory( cat );
-            Karunit := TensorUnit( cat );
+            C := UnderlyingCategory( KarEnvC );
+            Karunit := TensorUnit( KarEnvC );
             e_x := IdempotentDatum( x );
             under_x := Source(e_x);
             leftunitorinv_under := LeftUnitorInverse( under_x );
-            return MorphismConstructor( cat, x, leftunitorinv_under, TensorProduct( Karunit, x ) );
+            return MorphismConstructor( KarEnvC, x, leftunitorinv_under, TensorProduct( Karunit, x ) );
         end );
     fi;
 
     #note: right unitor
     if CanCompute( C, "RightUnitor") then
         AddRightUnitor( KarEnvC, 
-        function( cat, x )
+        function( KarEnvC, x )
             local C, Karunit, e_x, under_x, rightunitor_under;
-            C := UnderlyingCategory( cat );
-            Karunit := TensorUnit( cat );
+            C := UnderlyingCategory( KarEnvC );
+            Karunit := TensorUnit( KarEnvC );
             e_x := IdempotentDatum( x );
             under_x := Source(e_x);
             rightunitor_under := RightUnitor( under_x );
-            return MorphismConstructor( cat, TensorProduct( x, Karunit ), rightunitor_under, x );
+            return MorphismConstructor( KarEnvC, TensorProduct( x, Karunit ), rightunitor_under, x );
         end );
     fi;
 
     #note: inverse of right unitor
     if CanCompute( C, "RightUnitorInverse") then
         AddRightUnitorInverse( KarEnvC, 
-        function( cat, x )
+        function( KarEnvC, x )
             local C, Karunit, e_x, under_x, rightunitorinv_under;
-            C := UnderlyingCategory( cat );
-            Karunit := TensorUnit( cat );
+            C := UnderlyingCategory( KarEnvC );
+            Karunit := TensorUnit( KarEnvC );
             e_x := IdempotentDatum( x );
             under_x := Source(e_x);
             rightunitorinv_under := RightUnitorInverse( under_x );
-            return MorphismConstructor( cat, x, rightunitorinv_under, TensorProduct( x, Karunit ) );
+            return MorphismConstructor( KarEnvC, x, rightunitorinv_under, TensorProduct( x, Karunit ) );
         end );
     fi;
 
     #note: associator from right to left
     if CanCompute( C, "AssociatorRightToLeft" ) then
         AddAssociatorRightToLeft( KarEnvC, 
-        function(cat, x, y, z)
+        function( KarEnvC, x, y, z )
             local C, e_x, e_y, e_z, under_x, under_y, under_z;
-            C := UnderlyingCategory( cat );
+            C := UnderlyingCategory( KarEnvC );
             e_x := IdempotentDatum( x );
             under_x := Source( e_x );
             e_y := IdempotentDatum( y );
             under_y := Source( e_y );
             e_z := IdempotentDatum( z );
             under_z := Source( e_z );
-            return MorphismConstructor( cat, TensorProduct( x, TensorProduct( y, z ) ), AssociatorRightToLeft( under_x, under_y, under_z ), TensorProduct( TensorProduct( x, y ), z ) );
+            return MorphismConstructor( KarEnvC, TensorProduct( x, TensorProduct( y, z ) ), AssociatorRightToLeft( under_x, under_y, under_z ), TensorProduct( TensorProduct( x, y ), z ) );
         end );
     fi;
 
     #note: associator from left to right
     if CanCompute( C, "AssociatorLeftToRight" ) then
         AddAssociatorLeftToRight( KarEnvC, 
-        function(cat, x, y, z)
+        function( KarEnvC, x, y, z )
             local C, e_x, e_y, e_z, under_x, under_y, under_z;
-            C := UnderlyingCategory( cat );
+            C := UnderlyingCategory( KarEnvC );
             e_x := IdempotentDatum( x );
             under_x := Source( e_x );
             e_y := IdempotentDatum( y );
             under_y := Source( e_y );
             e_z := IdempotentDatum( z );
             under_z := Source( e_z );
-            return MorphismConstructor( cat, TensorProduct( TensorProduct( x, y ), z ), AssociatorLeftToRight( under_x, under_y, under_z ), TensorProduct( x, TensorProduct( y, z ) ) );
+            return MorphismConstructor( KarEnvC, TensorProduct( TensorProduct( x, y ), z ), AssociatorLeftToRight( under_x, under_y, under_z ), TensorProduct( x, TensorProduct( y, z ) ) );
         end );
     fi;
 
@@ -266,20 +266,24 @@ InstallMethod( KaroubiEnvelope,
     #Q: how can I find the documentation related to a specific structure such as AbCategory and so on?
 
     #preservation of pre-additive structure
-    #Q: Is it enough to build the structure of sums and differences of morphisms? Do I have to define the zero object and the zero morphism? Is the zero morphism a universal morphism (i.e. the zero morph in the zero obj) or it is a "contructor" such that for every two objects build the zero morph between the two objcets?
-    #Q: do I have to say somehow that, if C is preadditive, then KarEnvC is preadditive? Is it "if IsAbCategory(C)" the right way to do it?
-    if IsAbCategory( C ) then
+
+    #TODO: set the fact that, if C is a preadditive cat, then also its Karoubi envelope is. At the moment the code IsAbCategory( kar ) give an error
+    
+    
+    #TODO: add zero object constructor in case in C is computable
+    if ( HasIsAbCategory( C ) and IsAbCategory( C ) ) or
+       ( HasIsCategoryWithZeroObject( C ) and IsCategoryWithZeroObject( C ) ) then
         #note: zero morphism between any two objects in KarEnvC
         if CanCompute( C, "ZeroMorphism" ) then
             AddZeroMorphism( KarEnvC,
-            function( cat, x, y )
+            function( KarEnvC, x, y )
                 local C, e_x, e_y, under_x, under_y;
-                C := UnderlyingCategory( cat );
+                C := UnderlyingCategory( KarEnvC );
                 e_x := IdempotentDatum( x );
                 e_y := IdempotentDatum( y );
                 under_x := Source( e_x );
                 under_y := Source( e_y );
-                return MorphismConstructor( cat, x, ZeroMorphism( under_x, under_y ), y );
+                return MorphismConstructor( KarEnvC, x, ZeroMorphism( under_x, under_y ), y );
             end);
         fi;
 
@@ -287,32 +291,34 @@ InstallMethod( KaroubiEnvelope,
         #TODO: add in the example/test file a check that the congruence is compatible with the addition
         if CanCompute( C, "AdditionForMorphisms" ) then
             AddAdditionForMorphisms( KarEnvC, 
-            function( cat, phi1, phi2)
+            function( KarEnvC, phi1, phi2)
                 local C, s, t, phi1_under, phi2_under;
-                C := UnderlyingCategory( cat );
+                C := UnderlyingCategory( KarEnvC );
                 s := Source( phi1 );
                 t := Target( phi1 );
                 phi1_under := UnderlyingMorphismDatum( phi1 );
                 phi2_under := UnderlyingMorphismDatum( phi2 );
-                return MorphismConstructor( cat, s, AdditionForMorphisms( phi1_under, phi2_under ), t );
+                return MorphismConstructor( KarEnvC, s, AdditionForMorphisms( phi1_under, phi2_under ), t );
             end);
         fi;
 
         #note: additive inverse for morphisms
         if CanCompute( C, "AdditiveInverseForMorphisms" ) then
             AddAdditiveInverseForMorphisms( KarEnvC, 
-            function( cat, phi)
+            function( KarEnvC, phi)
                 local C, s, t, phi_under;
-                C := UnderlyingCategory( cat );
+                C := UnderlyingCategory( KarEnvC );
                 s := Source( phi );
                 t := Target( phi );
                 phi_under := UnderlyingMorphismDatum( phi );
-                return MorphismConstructor( cat, s, AdditiveInverseForMorphisms( phi_under ), t );
+                return MorphismConstructor( KarEnvC, s, AdditiveInverseForMorphisms( phi_under ), t );
             end);
         fi;
     fi;
 
     #Q: do I have to add something for the additive structure? If C is an additive category, then the Karobi envelope is an iteration, it is not more skeletal maybe, indeed you are formally adding an object for each idempotent, but you already have direct summand in the additive category, so all the objects in the karoubi envelope is isomorphic to an element in the essential image of the functor
 
-return KarEnvC;
+    Finalize( KarEnvC );
+  
+    return KarEnvC;
 end);
