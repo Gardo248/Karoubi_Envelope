@@ -198,7 +198,7 @@ InstallMethod( KaroubiEnvelope,
 
         #note: right unitor
         if CanCompute( C, "RightUnitor") then
-            AddRightUnitorAddRightUnitorWithGivenTensorProduct( KarEnvC, 
+            AddRightUnitorWithGivenTensorProduct( KarEnvC, 
             function( KarEnvC, x, x_times_one )
                 local C, Karunit, e_x, under_x, rightunitor_under;
                 C := UnderlyingCategory( KarEnvC );
