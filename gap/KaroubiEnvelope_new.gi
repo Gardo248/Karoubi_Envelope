@@ -270,8 +270,9 @@ InstallMethod( KaroubiEnvelope,
     
     
     #TODO: add zero object constructor in case in C is computable
-    if ( HasIsAbCategory( C ) and IsAbCategory( C ) ) or
-       ( HasIsCategoryWithZeroObject( C ) and IsCategoryWithZeroObject( C ) ) then
+    if ( HasIsAbCategory( C ) and IsAbCategory( C ) ) then
+        SetIsAbCategory( KarEnvC, true );
+
         #note: zero morphism between any two objects in KarEnvC
         if CanCompute( C, "ZeroMorphism" ) then
             AddZeroMorphism( KarEnvC,
@@ -283,7 +284,7 @@ InstallMethod( KaroubiEnvelope,
                 under_x := Source( e_x );
                 under_y := Source( e_y );
                 return MorphismConstructor( KarEnvC, x, ZeroMorphism( under_x, under_y ), y );
-            end);
+            end );
         fi;
 
         #note: addition for morphisms
@@ -298,7 +299,7 @@ InstallMethod( KaroubiEnvelope,
                 phi1_under := UnderlyingMorphismDatum( phi1 );
                 phi2_under := UnderlyingMorphismDatum( phi2 );
                 return MorphismConstructor( KarEnvC, s, AdditionForMorphisms( phi1_under, phi2_under ), t );
-            end);
+            end );
         fi;
 
         #note: additive inverse for morphisms
@@ -311,7 +312,43 @@ InstallMethod( KaroubiEnvelope,
                 t := Target( phi );
                 phi_under := UnderlyingMorphismDatum( phi );
                 return MorphismConstructor( KarEnvC, s, AdditiveInverseForMorphisms( phi_under ), t );
-            end);
+            end );
+        fi;
+    fi;
+
+    if HasIsCategoryWithZeroObject( C ) and IsCategoryWithZeroObject( C ) then
+        SetIsCategoryWithZeroObject( KarEnvC, true );
+
+        if CanCompute( C, "ZeroObject" ) then
+            AddZeroObject(  KarEnvC, 
+            function( KarEnvC )
+                local C, zero_C;
+                C := UnderlyingCategory( KarEnvC );
+                zero_C := ZeroObject( C );
+                return ObjectConstructor( KarEnvC, IdentityMorphism( zero_C ) );
+            end )
+        fi; 
+
+        if CanCompute( C, "UniversalMorphismFromZeroObject" ) then
+            UniversalMorphismFromZeroObjectWithGivenZeroObject( KarEnvC,
+            function( KarEnvC, x, zero )
+                local C, e_x, under_x;
+                C := UnderlyingCategory( KarEnvC );
+                e_x := IdempotentDatum( x );
+                under_x := Source( e_x );
+                return MorphismConstructor( KarEnvC, zero, UniversalMorphismFromZeroObject( under_x ), x );
+            end );
+
+            if CanCompute( C, "UniversalMorphismIntoZeroObject" ) then
+            UniversalMorphismIntoZeroObjectWithGivenZeroObject( KarEnvC,
+            function( KarEnvC, x, zero )
+                local C, e_x, under_x;
+                C := UnderlyingCategory( KarEnvC );
+                e_x := IdempotentDatum( x );
+                under_x := Source( e_x );
+                return MorphismConstructor( KarEnvC, zero, UniversalMorphismIntoZeroObject( under_x ), x );
+            end );
+        fi;
         fi;
     fi;
 
