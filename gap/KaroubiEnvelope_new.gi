@@ -268,8 +268,6 @@ InstallMethod( KaroubiEnvelope,
 
     #TODO: set the fact that, if C is a preadditive cat, then also its Karoubi envelope is. At the moment the code IsAbCategory( kar ) give an error
     
-    
-    #TODO: add zero object constructor in case in C is computable
     if ( HasIsAbCategory( C ) and IsAbCategory( C ) ) then
         SetIsAbCategory( KarEnvC, true );
 
@@ -316,6 +314,8 @@ InstallMethod( KaroubiEnvelope,
         fi;
     fi;
 
+    #note: preservation of zero object
+
     if HasIsCategoryWithZeroObject( C ) and IsCategoryWithZeroObject( C ) then
         SetIsCategoryWithZeroObject( KarEnvC, true );
 
@@ -352,9 +352,71 @@ InstallMethod( KaroubiEnvelope,
         fi;
     fi;
 
-    #Q: do I have to add something for the additive structure? If C is an additive category, then the Karobi envelope is an iteration, it is not more skeletal maybe, indeed you are formally adding an object for each idempotent, but you already have direct summand in the additive category, so all the objects in the karoubi envelope is isomorphic to an element in the essential image of the functor
+    #Q: is it correct? Is there something I didn't considered?
+    #Q: is it enough to implement the coproduct, and then the product is obtained conjugating with the opposite category?
+    #note: preservation of coproducts
+
+    #TODO: check the mathematics!!!!
+
+    # if CanCompute( C, "Coproduct" ) and CanCompute( C, "UniversalMorphismFromCoproduct" ) and CanCompute( C, "InjectionOfCofactorOfCoproduct" ) then
+    #     AddCoproduct( KarEnvC,
+    #     function( KarEnvC, L )
+    #         local C, e_L, under_L, coprod_under_L, idempotent_of_coproduct;
+    #         C := UnderlyingCategory( KarEnvC );
+    #         e_L := List( L, x -> IdempotentDatum( x ) );
+    #         under_L := List( e_L, e_x -> Source( e_x ) );
+    #         coprod_under_L := Coproduct( C, under_L );
+    #         idempotent_of_coproduct := UniversalMorphismFromCoproduct( C, under_L, coprod_under_L,
+    #                             List( [ 1 .. Length( under_L ) ], k -> PreCompose( C, InjectionOfCofactorOfCoproduct( C, under_L, k ), e_L[k] ) ) );
+    #         return ObjectConstructor( KarEnvC, idempotent_of_coproduct );
+    #     end );
+
+    #     AddInjectionOfCofactorOfCoproductWithGivenCoproduct( KarEnvC,
+    #     function( KarEnvC, L, k, coprod )
+    #     local C, e_L, under_L;
+    #     C := UnderlyingCategory( KarEnvC );
+    #     e_L := List( L, x -> IdempotentDatum( x ) );
+    #     under_L := List( e_L, e_x -> Source( e_x ) );
+    #     return MorphismConstructor( KarEnvC, L[k], PreCompose( C, UniversalMorphismFromCoproduct( C, under_L, k ), e_L[k] ), coprod ); 
+    #     end );
+
+    #     AddUniversalMorphismFromCoproductWithGivenCoproduct( KarEnvC,
+    #     function( KarEnvC, L, z, tao, coprod )
+    #     local C, e_L, under_L, under_tao, e_z, under_z;
+    #     C := UnderlyingCategory( KarEnvC );
+    #     e_L := List( L, x -> IdempotentDatum( x ) );
+    #     under_L := List( e_L, e_x -> Source( e_x ) );
+    #     under_tao := List( tao, phi -> UnderlyingMorphismDatum( phi ) );
+    #     e_z := IdempotentDatum( z );
+    #     under_z := Source( e_z );
+    #     #note: the element phi = under_tao[k] in under_tao are morphism commuting with the idempotents, i.e. PreCompose( Precompose( e_z, phi ), e_L[k] ) 
+    #     return MorphismConstructor( KarEnvC, coprod, UniversalMorphismFromCoproduct( C, under_L, under_z, under_tao ), z );
+    #     end );
+    # fi;
+
+    #note: preservation of structures to be implemented in case we need them
+
+    if HasIsEnrichedOverCommutativeRegularSemigroup( C ) and IsEnrichedOverCommutativeRegularSemigroup( C ) then
+        SetIsEnrichedOverCommutativeRegularSemigroup( KarEnvC, true );
+    fi;
+
+    if HasIsCategoryWithTerminalObject( C ) and IsCategoryWithTerminalObject( C ) then
+        SetIsCategoryWithTerminalObject( KarEnvC, true );
+    fi;
+
+    if HasIsCategoryWithInitialObject( C ) and IsCategoryWithInitialObject( C ) then
+        SetIsCategoryWithInitialObject( KarEnvC, true );
+    fi;
+
+    if HasIsAdditiveMonoidalCategory( C ) and IsAdditiveMonoidalCategory( C ) then
+        SetIsAdditiveMonoidalCategory( KarEnvC, true );
+    fi;
+
+    # if Has( C ) and ( C ) then
+    #     Set( KarEnvC, true );
+    # fi;
 
     Finalize( KarEnvC );
   
     return KarEnvC;
-end);
+end );
