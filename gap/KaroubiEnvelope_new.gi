@@ -326,11 +326,11 @@ InstallMethod( KaroubiEnvelope,
                 C := UnderlyingCategory( KarEnvC );
                 zero_C := ZeroObject( C );
                 return ObjectConstructor( KarEnvC, IdentityMorphism( zero_C ) );
-            end )
+            end );
         fi; 
 
         if CanCompute( C, "UniversalMorphismFromZeroObject" ) then
-            UniversalMorphismFromZeroObjectWithGivenZeroObject( KarEnvC,
+            AddUniversalMorphismFromZeroObjectWithGivenZeroObject( KarEnvC,
             function( KarEnvC, x, zero )
                 local C, e_x, under_x;
                 C := UnderlyingCategory( KarEnvC );
@@ -340,7 +340,7 @@ InstallMethod( KaroubiEnvelope,
             end );
 
             if CanCompute( C, "UniversalMorphismIntoZeroObject" ) then
-            UniversalMorphismIntoZeroObjectWithGivenZeroObject( KarEnvC,
+            AddUniversalMorphismIntoZeroObjectWithGivenZeroObject( KarEnvC,
             function( KarEnvC, x, zero )
                 local C, e_x, under_x;
                 C := UnderlyingCategory( KarEnvC );
