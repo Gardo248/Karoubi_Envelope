@@ -26,7 +26,7 @@ f := VectorSpaceMorphism( V, HomalgMatrix( [ [ 0, 0 ], [ 1, 1 ] ], 2, 2, Q ), V 
 iA := IdentityMorphism( V ) / kar;
 
 i := ObjectDatum( iA );
-IsEqualForObjects( iA, i / kar );
+iA = i / kar;
 #true
 
 eA := e / kar;
@@ -55,13 +55,13 @@ CanCompute( kar, "TensorProductOnObjects" );
 
 one := TensorUnit( kar );
 
-IsEqualForObjects( fA, TensorProduct( fA, one ) );
+fA = TensorProduct( fA, one );
 #true
 
 IsCongruentForMorphisms( psi, TensorProduct( IdentityMorphism( one ), psi ) );
 #true
 
-TensorProduct( psi, phi );
+phipsi := TensorProduct( psi, phi );
 #a morphism in KaroubiEnvelope(Category of matices over Q)
 
 MorphismDatum( TensorProduct( psi, phi ) );
@@ -75,7 +75,7 @@ MorphismDatum( TensorProduct( psi, phi ) );
 Source( TensorProduct( psi, phi ) );
 #an object in KaroubiEnvelope(Category of matrices over Q)
 
-IsEqualForMorphisms( TensorProduct( i, f ), IdempotentDatum( Source( TensorProduct( psi, phi ) ) ) );
+IsEqualForMorphisms( TensorProduct( i, f ), IdempotentDatum( Source( phipsi ) ) );
 #true
 
 #TODO: add examples with unitors and associators
@@ -83,7 +83,20 @@ IsEqualForMorphisms( TensorProduct( i, f ), IdempotentDatum( Source( TensorProdu
 CanCompute( kar, "ZeroMorphism");
 #true
 
+IsAbCategory( kar );
+#true
 
+zero_ef := ZeroMorphism( eA, fA );
+
+zero := ZeroObject( kar );
+
+zero_zero := ZeroMorphism( zero, zero );
+
+TensorProduct( zero_ef, zero_zero + zero_zero ) = zero_zero;
+#true
+
+PreCompose( IdentityMorphism( iA ), psi ) - psi = ZeroMorphism(iA, fA);
+#true
 
 
 

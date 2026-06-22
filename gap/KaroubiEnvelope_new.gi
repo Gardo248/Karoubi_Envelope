@@ -1,7 +1,7 @@
 InstallMethod( KaroubiEnvelope,
     "for a CAP category",
     [ IsCapCategory ],
-    function ( C )
+    function( C )
     local KarEnvC;
 
     KarEnvC := CreateCapCategoryWithDataTypes(
@@ -354,45 +354,46 @@ InstallMethod( KaroubiEnvelope,
 
     #Q: is it correct? Is there something I didn't considered?
     #Q: is it enough to implement the coproduct, and then the product is obtained conjugating with the opposite category?
+    #Q: it is possible that we can compute the coproduct only for some objects in the category. In this case, is the precondition CanCompute("Coproduct") the right check or there is a better check to do?
     #note: preservation of coproducts
 
-    #TODO: check the mathematics!!!!
+    if CanCompute( C, "Coproduct" ) and CanCompute( C, "UniversalMorphismFromCoproductWithGivenCoproduct" ) and CanCompute( C, "InjectionOfCofactorOfCoproductWithGivenCoproduct" ) then
+        AddCoproduct( KarEnvC,
+        function( KarEnvC, L )
+            local C, e_L, under_L, coprod_under_L, idempotent_of_coproduct;
+            C := UnderlyingCategory( KarEnvC );
+            e_L := List( L, x -> IdempotentDatum( x ) );
+            under_L := List( e_L, e_x -> Source( e_x ) );
+            coprod_under_L := Coproduct( C, under_L );
+            idempotent_of_coproduct := UniversalMorphismFromCoproduct( C, under_L, coprod_under_L,
+                                List( [ 1 .. Length( under_L ) ], k -> PreCompose( C, e_L[k], InjectionOfCofactorOfCoproductWithGivenCoproduct( C, under_L, k, coprod_under_L ) ) ) );
+            return ObjectConstructor( KarEnvC, idempotent_of_coproduct );
+        end );
 
-    # if CanCompute( C, "Coproduct" ) and CanCompute( C, "UniversalMorphismFromCoproduct" ) and CanCompute( C, "InjectionOfCofactorOfCoproduct" ) then
-    #     AddCoproduct( KarEnvC,
-    #     function( KarEnvC, L )
-    #         local C, e_L, under_L, coprod_under_L, idempotent_of_coproduct;
-    #         C := UnderlyingCategory( KarEnvC );
-    #         e_L := List( L, x -> IdempotentDatum( x ) );
-    #         under_L := List( e_L, e_x -> Source( e_x ) );
-    #         coprod_under_L := Coproduct( C, under_L );
-    #         idempotent_of_coproduct := UniversalMorphismFromCoproduct( C, under_L, coprod_under_L,
-    #                             List( [ 1 .. Length( under_L ) ], k -> PreCompose( C, InjectionOfCofactorOfCoproduct( C, under_L, k ), e_L[k] ) ) );
-    #         return ObjectConstructor( KarEnvC, idempotent_of_coproduct );
-    #     end );
+        AddInjectionOfCofactorOfCoproductWithGivenCoproduct( KarEnvC,
+        function( KarEnvC, L, k, coprod )
+            local C, e_L, under_L, under_coprod;
+            C := UnderlyingCategory( KarEnvC );
+            e_L := List( L, x -> IdempotentDatum( x ) );
+            under_L := List( e_L, e_x -> Source( e_x ) );
+            under_coprod := Source( IdempotentDatum( coprod ) );
+            return MorphismConstructor( KarEnvC, L[k], PreCompose( C, e_L[k], UniversalMorphismFromCoproductWithGivenCoproduct( C, under_L, k, under_coprod ) ), coprod ); 
+        end );
 
-    #     AddInjectionOfCofactorOfCoproductWithGivenCoproduct( KarEnvC,
-    #     function( KarEnvC, L, k, coprod )
-    #     local C, e_L, under_L;
-    #     C := UnderlyingCategory( KarEnvC );
-    #     e_L := List( L, x -> IdempotentDatum( x ) );
-    #     under_L := List( e_L, e_x -> Source( e_x ) );
-    #     return MorphismConstructor( KarEnvC, L[k], PreCompose( C, UniversalMorphismFromCoproduct( C, under_L, k ), e_L[k] ), coprod ); 
-    #     end );
-
-    #     AddUniversalMorphismFromCoproductWithGivenCoproduct( KarEnvC,
-    #     function( KarEnvC, L, z, tao, coprod )
-    #     local C, e_L, under_L, under_tao, e_z, under_z;
-    #     C := UnderlyingCategory( KarEnvC );
-    #     e_L := List( L, x -> IdempotentDatum( x ) );
-    #     under_L := List( e_L, e_x -> Source( e_x ) );
-    #     under_tao := List( tao, phi -> UnderlyingMorphismDatum( phi ) );
-    #     e_z := IdempotentDatum( z );
-    #     under_z := Source( e_z );
-    #     #note: the element phi = under_tao[k] in under_tao are morphism commuting with the idempotents, i.e. PreCompose( Precompose( e_z, phi ), e_L[k] ) 
-    #     return MorphismConstructor( KarEnvC, coprod, UniversalMorphismFromCoproduct( C, under_L, under_z, under_tao ), z );
-    #     end );
-    # fi;
+        AddUniversalMorphismFromCoproductWithGivenCoproduct( KarEnvC,
+        function( KarEnvC, L, z, tao, coprod )
+            local C, e_L, under_L, under_tao, e_z, under_z, under_coprod;
+            C := UnderlyingCategory( KarEnvC );
+            e_L := List( L, x -> IdempotentDatum( x ) );
+            under_L := List( e_L, e_x -> Source( e_x ) );
+            under_tao := List( tao, phi -> UnderlyingMorphismDatum( phi ) );
+            e_z := IdempotentDatum( z );
+            under_z := Source( e_z );
+            under_coprod := Source( IdempotentDatum( coprod ) );
+            #note: the element phi = under_tao[k] in under_tao are morphism commuting with the idempotents, i.e. PreCompose( Precompose( e_z, phi ), e_L[k] ) 
+        return MorphismConstructor( KarEnvC, coprod, UniversalMorphismFromCoproductWithGivenCoproduct( C, under_L, under_z, under_tao, under_coprod ), z );
+        end );
+    fi;
 
     #note: preservation of structures to be implemented in case we need them
 
