@@ -16,41 +16,27 @@ InstallMethod( KaroubiEnvelope,
 
     #note: I set the source category C as the Underlying category of the output category KarEnvC
     SetUnderlyingCategory( KarEnvC, C );
-     
-    #Q: Is this a good definition? I will postpone the check that the morphism is an idempotent inside the IsWellDefinedForObject.
-    #Q: Should I eliminate the datum of the source of the idempotent? Perhaps turn it into an operation.  
+      
     AddObjectConstructor( KarEnvC,
         function( KarEnvC, idempotent )
-        return CreateCapCategoryObjectWithAttributes( KarEnvC, IdempotentDatum, idempotent );
-        # option with the datum of the source inside the object datum:
-        # return CreateCapCategoryObjectWithAttributes( KarEnvC, IdempotentDatum, idempotent, UnderlyingSourceOfIdempotent, Source(idempotent) );
-    end );
+            return CreateCapCategoryObjectWithAttributes( KarEnvC, IdempotentDatum, idempotent );
+        end );
 
     AddObjectDatum( KarEnvC,
         function ( KarEnvC, obj )
             return IdempotentDatum ( obj );
     end );
 
-#not much interesting idea: 
-# In case I want to separate the datum of the underlying object (the source of the idempotent) from the constructor, I can do it in this way, adding the attribute "UnderlyingObjectForKaroubiObjects" in the declaration file
-    # InstallMethod(UnderlyingObjectForKaroubiObjects,
-    #             [ IsKaroubiObject ],
-    #     function (obj)
-    #     return Source( IdempotentDatum (obj) );
-    # end);
-
     if CanCompute( C, "IsCongruentForMorphisms" ) then
         AddIsWellDefinedForObjects( KarEnvC,
             function ( KarEnvC, obj )
                 local C, e;
                 C := UnderlyingCategory( KarEnvC );
-                e := IdempotentDatum ( obj );
+                e := IdempotentDatum( obj );
                 return IsCongruentForMorphisms( C, PreCompose( C, e, e ), e );
             end );
     fi;
 
-    #Q: is it better to use IsCongruentForMorphisms or IsEqualForMorphisms?
-    #The point is that Cap is functional and so I have to assure that equal inputs gives equal outputs!
     AddIsEqualForObjects( KarEnvC,
             function ( KarEnvC, obj1, obj2 )
                 local C, e1, e2;
@@ -132,7 +118,158 @@ InstallMethod( KaroubiEnvelope,
 
     #note: from now on we implement the preservation of structures of the underlying category C
 
+    #TODO: check in example/test file that righ unitor and its inverse are effectively inverses, same for the left one
+
+    #note: preservation of pre-additive structure
+    
+    if HasIsAbCategory( C ) and IsAbCategory( C ) then
+        SetIsAbCategory( KarEnvC, true );
+
+        #note: zero morphism between any two objects in KarEnvC
+        if CanCompute( C, "ZeroMorphism" ) then
+            AddZeroMorphism( KarEnvC,
+            function( KarEnvC, x, y )
+                local C, e_x, e_y, under_x, under_y;
+                C := UnderlyingCategory( KarEnvC );
+                e_x := IdempotentDatum( x );
+                e_y := IdempotentDatum( y );
+                under_x := Source( e_x );
+                under_y := Source( e_y );
+                return MorphismConstructor( KarEnvC, x, ZeroMorphism( under_x, under_y ), y );
+            end );
+        fi;
+
+        #note: addition for morphisms
+        #TODO: add in the example/test file a check that the congruence is compatible with the addition
+        if CanCompute( C, "AdditionForMorphisms" ) then
+            AddAdditionForMorphisms( KarEnvC, 
+            function( KarEnvC, phi1, phi2)
+                local C, s, t, phi1_under, phi2_under;
+                C := UnderlyingCategory( KarEnvC );
+                s := Source( phi1 );
+                t := Target( phi1 );
+                phi1_under := UnderlyingMorphismDatum( phi1 );
+                phi2_under := UnderlyingMorphismDatum( phi2 );
+                return MorphismConstructor( KarEnvC, s, AdditionForMorphisms( phi1_under, phi2_under ), t );
+            end );
+        fi;
+
+        #note: additive inverse for morphisms
+        if CanCompute( C, "AdditiveInverseForMorphisms" ) then
+            AddAdditiveInverseForMorphisms( KarEnvC, 
+            function( KarEnvC, phi)
+                local C, s, t, phi_under;
+                C := UnderlyingCategory( KarEnvC );
+                s := Source( phi );
+                t := Target( phi );
+                phi_under := UnderlyingMorphismDatum( phi );
+                return MorphismConstructor( KarEnvC, s, AdditiveInverseForMorphisms( phi_under ), t );
+            end );
+        fi;
+    fi;
+
+    #TODO: add preservation of enrichment
+    if HasIsEnrichedOverCommutativeRegularSemigroup( C ) and IsEnrichedOverCommutativeRegularSemigroup( C ) then
+        SetIsEnrichedOverCommutativeRegularSemigroup( KarEnvC, true );
+    fi;
+
+    #todo: add the if hasiscocartesian and is cocartesian then...
+    #todo: if it is additive then derive the product and coproduct directly, else if it is cartesian or cocartesian derive it separately, also the zeroobject will be in the else stuff
+    if HasIsAdditiveCategory( C ) and IsAdditiverCategory( C ) then
+        SetIsAdditiveCategory( KarEnvC );
+        #TODO: write the preservation of additive structure
+    else
+        #note: preservation of coproducts
+        #TODO: have a look to CoproductFunctorial... and to MorphismBetweenCoproducts (ToolsForCategoricalTowers)
+        if HasIsCocartesian( C ) and IsCocartesian( C ) then
+            SetIsCocartesian( KarEnvC );
+            if CanCompute( C, "Coproduct" ) and CanCompute( C, "UniversalMorphismFromCoproductWithGivenCoproduct" ) and CanCompute( C, "InjectionOfCofactorOfCoproductWithGivenCoproduct" ) then
+                AddCoproduct( KarEnvC,
+                function( KarEnvC, L )
+                    local C, e_L, under_L, coprod_under_L, idempotent_of_coproduct;
+                    C := UnderlyingCategory( KarEnvC );
+                    e_L := List( L, x -> IdempotentDatum( x ) );
+                    under_L := List( e_L, e_x -> Source( e_x ) );
+                    coprod_under_L := Coproduct( C, under_L );
+                    idempotent_of_coproduct := UniversalMorphismFromCoproductWithGivenCoproduct( C, under_L, coprod_under_L,
+                                        List( [ 1 .. Length( under_L ) ], k -> PreCompose( C, e_L[k], InjectionOfCofactorOfCoproductWithGivenCoproduct( C, under_L, k, coprod_under_L ) ) ), coprod_under_L );
+                    return ObjectConstructor( KarEnvC, idempotent_of_coproduct );
+                end );
+
+                AddInjectionOfCofactorOfCoproductWithGivenCoproduct( KarEnvC,
+                function( KarEnvC, L, k, coprod )
+                    local C, e_L, under_L, under_coprod;
+                    C := UnderlyingCategory( KarEnvC );
+                    e_L := List( L, x -> IdempotentDatum( x ) );
+                    under_L := List( e_L, e_x -> Source( e_x ) );
+                    under_coprod := Source( IdempotentDatum( coprod ) );
+                    return MorphismConstructor( KarEnvC, L[k], PreCompose( C, e_L[k], UniversalMorphismFromCoproductWithGivenCoproduct( C, under_L, k, under_coprod ) ), coprod ); 
+                end );
+
+                AddUniversalMorphismFromCoproductWithGivenCoproduct( KarEnvC,
+                function( KarEnvC, L, z, tao, coprod )
+                    local C, e_L, under_L, under_tao, e_z, under_z, under_coprod;
+                    C := UnderlyingCategory( KarEnvC );
+                    e_L := List( L, x -> IdempotentDatum( x ) );
+                    under_L := List( e_L, e_x -> Source( e_x ) );
+                    under_tao := List( tao, phi -> UnderlyingMorphismDatum( phi ) );
+                    e_z := IdempotentDatum( z );
+                    under_z := Source( e_z );
+                    under_coprod := Source( IdempotentDatum( coprod ) );
+                    #note: the element phi = under_tao[k] in under_tao are morphism commuting with the idempotents, i.e. PreCompose( Precompose( e_z, phi ), e_L[k] ) 
+                return MorphismConstructor( KarEnvC, coprod, UniversalMorphismFromCoproductWithGivenCoproduct( C, under_L, under_z, under_tao, under_coprod ), z );
+                end );
+            fi;
+        elif HasIsCartesiaCategory( C ) and IsCartesianCategory( C ) then
+        #TODO: add preservation of products
+        fi;
+
+        #note: preservation of zero object
+        if HasIsCategoryWithZeroObject( C ) and IsCategoryWithZeroObject( C ) then
+            SetIsCategoryWithZeroObject( KarEnvC, true );
+
+            if CanCompute( C, "ZeroObject" ) then
+                AddZeroObject(  KarEnvC, 
+                function( KarEnvC )
+                    local C, zero_C;
+                    C := UnderlyingCategory( KarEnvC );
+                    zero_C := ZeroObject( C );
+                    return ObjectConstructor( KarEnvC, IdentityMorphism( C, zero_C ) );
+                end );
+            fi; 
+
+            if CanCompute( C, "UniversalMorphismFromZeroObject" ) then
+                AddUniversalMorphismFromZeroObjectWithGivenZeroObject( KarEnvC,
+                function( KarEnvC, x, zero )
+                    local C, e_x, under_x;
+                    C := UnderlyingCategory( KarEnvC );
+                    e_x := IdempotentDatum( x );
+                    under_x := Source( e_x );
+                    return MorphismConstructor( KarEnvC, zero, UniversalMorphismFromZeroObject( C, under_x ), x );
+                end );
+
+                if CanCompute( C, "UniversalMorphismIntoZeroObject" ) then
+                AddUniversalMorphismIntoZeroObjectWithGivenZeroObject( KarEnvC,
+                function( KarEnvC, x, zero )
+                    local C, e_x, under_x;
+                    C := UnderlyingCategory( KarEnvC );
+                    e_x := IdempotentDatum( x );
+                    under_x := Source( e_x );
+                    return MorphismConstructor( KarEnvC, zero, UniversalMorphismIntoZeroObject( C, under_x ), x );
+                end );
+            fi;
+        else
+            if HasIsCategoryWithTerminalObject( C ) and IsCategoryWithTerminalObject( C ) then
+                SetIsCategoryWithTerminalObject( KarEnvC, true );
+
+            elif HasIsCategoryWithInitialObject( C ) and IsCategoryWithInitialObject( C ) then
+                SetIsCategoryWithInitialObject( KarEnvC, true );
+            fi;
+        fi;
+    fi;
+
     #note: preservation of monoidal structure
+
     if HasIsMonoidalCategory( C ) and IsMonoidalCategory( C ) then
         SetIsMonoidalCategory( KarEnvC, true );
 
@@ -204,7 +341,7 @@ InstallMethod( KaroubiEnvelope,
                 C := UnderlyingCategory( KarEnvC );
                 e_x := IdempotentDatum( x );
                 under_x := Source(e_x);
-                rightunitor_under := RightUnitor( under_x );
+                rightunitor_under := RightUnitor( C, under_x );
                 return MorphismConstructor( KarEnvC, x_times_one, rightunitor_under, x );
             end );
         fi;
@@ -257,160 +394,10 @@ InstallMethod( KaroubiEnvelope,
                 return MorphismConstructor( KarEnvC, source, AssociatorLeftToRight( under_x, under_y, under_z ), target );
             end );
         fi;
-    fi;
-
-    
-    
-
-    #TODO: check in example/test file that righ unitor and its inverse are effectively inverses, same for the left one
-
-    #preservation of pre-additive structure
-
-    #TODO: set the fact that, if C is a preadditive cat, then also its Karoubi envelope is. At the moment the code IsAbCategory( kar ) give an error
-    
-    if ( HasIsAbCategory( C ) and IsAbCategory( C ) ) then
-        SetIsAbCategory( KarEnvC, true );
-
-        #note: zero morphism between any two objects in KarEnvC
-        if CanCompute( C, "ZeroMorphism" ) then
-            AddZeroMorphism( KarEnvC,
-            function( KarEnvC, x, y )
-                local C, e_x, e_y, under_x, under_y;
-                C := UnderlyingCategory( KarEnvC );
-                e_x := IdempotentDatum( x );
-                e_y := IdempotentDatum( y );
-                under_x := Source( e_x );
-                under_y := Source( e_y );
-                return MorphismConstructor( KarEnvC, x, ZeroMorphism( under_x, under_y ), y );
-            end );
+        
+        if HasIsAdditiveMonoidalCategory( C ) and IsAdditiveMonoidalCategory( C ) then
+            SetIsAdditiveMonoidalCategory( KarEnvC, true );
         fi;
-
-        #note: addition for morphisms
-        #TODO: add in the example/test file a check that the congruence is compatible with the addition
-        if CanCompute( C, "AdditionForMorphisms" ) then
-            AddAdditionForMorphisms( KarEnvC, 
-            function( KarEnvC, phi1, phi2)
-                local C, s, t, phi1_under, phi2_under;
-                C := UnderlyingCategory( KarEnvC );
-                s := Source( phi1 );
-                t := Target( phi1 );
-                phi1_under := UnderlyingMorphismDatum( phi1 );
-                phi2_under := UnderlyingMorphismDatum( phi2 );
-                return MorphismConstructor( KarEnvC, s, AdditionForMorphisms( phi1_under, phi2_under ), t );
-            end );
-        fi;
-
-        #note: additive inverse for morphisms
-        if CanCompute( C, "AdditiveInverseForMorphisms" ) then
-            AddAdditiveInverseForMorphisms( KarEnvC, 
-            function( KarEnvC, phi)
-                local C, s, t, phi_under;
-                C := UnderlyingCategory( KarEnvC );
-                s := Source( phi );
-                t := Target( phi );
-                phi_under := UnderlyingMorphismDatum( phi );
-                return MorphismConstructor( KarEnvC, s, AdditiveInverseForMorphisms( phi_under ), t );
-            end );
-        fi;
-    fi;
-
-    #note: preservation of zero object
-
-    if HasIsCategoryWithZeroObject( C ) and IsCategoryWithZeroObject( C ) then
-        SetIsCategoryWithZeroObject( KarEnvC, true );
-
-        if CanCompute( C, "ZeroObject" ) then
-            AddZeroObject(  KarEnvC, 
-            function( KarEnvC )
-                local C, zero_C;
-                C := UnderlyingCategory( KarEnvC );
-                zero_C := ZeroObject( C );
-                return ObjectConstructor( KarEnvC, IdentityMorphism( zero_C ) );
-            end );
-        fi; 
-
-        if CanCompute( C, "UniversalMorphismFromZeroObject" ) then
-            AddUniversalMorphismFromZeroObjectWithGivenZeroObject( KarEnvC,
-            function( KarEnvC, x, zero )
-                local C, e_x, under_x;
-                C := UnderlyingCategory( KarEnvC );
-                e_x := IdempotentDatum( x );
-                under_x := Source( e_x );
-                return MorphismConstructor( KarEnvC, zero, UniversalMorphismFromZeroObject( under_x ), x );
-            end );
-
-            if CanCompute( C, "UniversalMorphismIntoZeroObject" ) then
-            AddUniversalMorphismIntoZeroObjectWithGivenZeroObject( KarEnvC,
-            function( KarEnvC, x, zero )
-                local C, e_x, under_x;
-                C := UnderlyingCategory( KarEnvC );
-                e_x := IdempotentDatum( x );
-                under_x := Source( e_x );
-                return MorphismConstructor( KarEnvC, zero, UniversalMorphismIntoZeroObject( under_x ), x );
-            end );
-        fi;
-        fi;
-    fi;
-
-    #Q: is it correct? Is there something I didn't considered?
-    #Q: is it enough to implement the coproduct, and then the product is obtained conjugating with the opposite category?
-    #Q: it is possible that we can compute the coproduct only for some objects in the category. In this case, is the precondition CanCompute("Coproduct") the right check or there is a better check to do?
-    #note: preservation of coproducts
-
-    if CanCompute( C, "Coproduct" ) and CanCompute( C, "UniversalMorphismFromCoproductWithGivenCoproduct" ) and CanCompute( C, "InjectionOfCofactorOfCoproductWithGivenCoproduct" ) then
-        AddCoproduct( KarEnvC,
-        function( KarEnvC, L )
-            local C, e_L, under_L, coprod_under_L, idempotent_of_coproduct;
-            C := UnderlyingCategory( KarEnvC );
-            e_L := List( L, x -> IdempotentDatum( x ) );
-            under_L := List( e_L, e_x -> Source( e_x ) );
-            coprod_under_L := Coproduct( C, under_L );
-            idempotent_of_coproduct := UniversalMorphismFromCoproduct( C, under_L, coprod_under_L,
-                                List( [ 1 .. Length( under_L ) ], k -> PreCompose( C, e_L[k], InjectionOfCofactorOfCoproductWithGivenCoproduct( C, under_L, k, coprod_under_L ) ) ) );
-            return ObjectConstructor( KarEnvC, idempotent_of_coproduct );
-        end );
-
-        AddInjectionOfCofactorOfCoproductWithGivenCoproduct( KarEnvC,
-        function( KarEnvC, L, k, coprod )
-            local C, e_L, under_L, under_coprod;
-            C := UnderlyingCategory( KarEnvC );
-            e_L := List( L, x -> IdempotentDatum( x ) );
-            under_L := List( e_L, e_x -> Source( e_x ) );
-            under_coprod := Source( IdempotentDatum( coprod ) );
-            return MorphismConstructor( KarEnvC, L[k], PreCompose( C, e_L[k], UniversalMorphismFromCoproductWithGivenCoproduct( C, under_L, k, under_coprod ) ), coprod ); 
-        end );
-
-        AddUniversalMorphismFromCoproductWithGivenCoproduct( KarEnvC,
-        function( KarEnvC, L, z, tao, coprod )
-            local C, e_L, under_L, under_tao, e_z, under_z, under_coprod;
-            C := UnderlyingCategory( KarEnvC );
-            e_L := List( L, x -> IdempotentDatum( x ) );
-            under_L := List( e_L, e_x -> Source( e_x ) );
-            under_tao := List( tao, phi -> UnderlyingMorphismDatum( phi ) );
-            e_z := IdempotentDatum( z );
-            under_z := Source( e_z );
-            under_coprod := Source( IdempotentDatum( coprod ) );
-            #note: the element phi = under_tao[k] in under_tao are morphism commuting with the idempotents, i.e. PreCompose( Precompose( e_z, phi ), e_L[k] ) 
-        return MorphismConstructor( KarEnvC, coprod, UniversalMorphismFromCoproductWithGivenCoproduct( C, under_L, under_z, under_tao, under_coprod ), z );
-        end );
-    fi;
-
-    #note: preservation of structures to be implemented in case we need them
-
-    if HasIsEnrichedOverCommutativeRegularSemigroup( C ) and IsEnrichedOverCommutativeRegularSemigroup( C ) then
-        SetIsEnrichedOverCommutativeRegularSemigroup( KarEnvC, true );
-    fi;
-
-    if HasIsCategoryWithTerminalObject( C ) and IsCategoryWithTerminalObject( C ) then
-        SetIsCategoryWithTerminalObject( KarEnvC, true );
-    fi;
-
-    if HasIsCategoryWithInitialObject( C ) and IsCategoryWithInitialObject( C ) then
-        SetIsCategoryWithInitialObject( KarEnvC, true );
-    fi;
-
-    if HasIsAdditiveMonoidalCategory( C ) and IsAdditiveMonoidalCategory( C ) then
-        SetIsAdditiveMonoidalCategory( KarEnvC, true );
     fi;
 
     # if Has( C ) and ( C ) then
