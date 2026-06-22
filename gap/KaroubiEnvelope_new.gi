@@ -268,6 +268,7 @@ InstallMethod( KaroubiEnvelope,
         fi;
     fi;
 
+
     #note: preservation of monoidal structure
 
     if HasIsMonoidalCategory( C ) and IsMonoidalCategory( C ) then
