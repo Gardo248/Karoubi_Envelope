@@ -178,6 +178,39 @@ InstallMethod( KaroubiEnvelope,
     if HasIsAdditiveCategory( C ) and IsAdditiveCategory( C ) then
         SetIsAdditiveCategory( KarEnvC, true  );
         #TODO: write the preservation of additive structure
+        if CanCompute( C, "ZeroObject" ) then
+            AddZeroObject(  KarEnvC, 
+            function( KarEnvC )
+                local C, zero_C;
+                C := UnderlyingCategory( KarEnvC );
+                zero_C := ZeroObject( C );
+                return ObjectConstructor( KarEnvC, IdentityMorphism( C, zero_C ) );
+            end );
+        fi; 
+
+        if CanCompute( C, "UniversalMorphismFromZeroObjectWithGivenZeroObject" ) then
+            AddUniversalMorphismFromZeroObjectWithGivenZeroObject( KarEnvC,
+            function( KarEnvC, x, zero )
+                local C, e_x, under_x, under_zero;
+                C := UnderlyingCategory( KarEnvC );
+                e_x := IdempotentDatum( x );
+                under_x := Source( e_x );
+                under_zero := Source( IdempotentDatum( zero ) );
+                return MorphismConstructor( KarEnvC, zero, UniversalMorphismFromZeroObjectWithGivenZeroObject( C, under_x, under_zero ), x );
+            end );
+        fi;
+
+        if CanCompute( C, "UniversalMorphismIntoZeroObjectWithGivenZeroObject" ) then
+            AddUniversalMorphismIntoZeroObjectWithGivenZeroObject( KarEnvC,
+            function( KarEnvC, x, zero )
+                local C, e_x, under_x, under_zero;
+                C := UnderlyingCategory( KarEnvC );
+                e_x := IdempotentDatum( x );
+                under_x := Source( e_x );
+                under_zero := Source( IdempotentDatum( zero ) );
+                return MorphismConstructor( KarEnvC, zero, UniversalMorphismIntoZeroObjectWithGivenZeroObject( C, under_x, under_zero ), x );
+            end );
+        fi;
     else
         #note: preservation of coproducts
         #TODO: have a look to CoproductFunctorial... and to MorphismBetweenCoproducts (ToolsForCategoricalTowers)
