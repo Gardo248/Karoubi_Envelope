@@ -175,14 +175,14 @@ InstallMethod( KaroubiEnvelope,
 
     #todo: add the if hasiscocartesian and is cocartesian then...
     #todo: if it is additive then derive the product and coproduct directly, else if it is cartesian or cocartesian derive it separately, also the zeroobject will be in the else stuff
-    if HasIsAdditiveCategory( C ) and IsAdditiverCategory( C ) then
-        SetIsAdditiveCategory( KarEnvC );
+    if HasIsAdditiveCategory( C ) and IsAdditiveCategory( C ) then
+        SetIsAdditiveCategory( KarEnvC, true  );
         #TODO: write the preservation of additive structure
     else
         #note: preservation of coproducts
         #TODO: have a look to CoproductFunctorial... and to MorphismBetweenCoproducts (ToolsForCategoricalTowers)
-        if HasIsCocartesian( C ) and IsCocartesian( C ) then
-            SetIsCocartesian( KarEnvC );
+        if HasIsCocartesianCategory( C ) and IsCocartesianCategory( C ) then
+            SetIsCocartesianCategory( KarEnvC, true  );
             if CanCompute( C, "Coproduct" ) and CanCompute( C, "UniversalMorphismFromCoproductWithGivenCoproduct" ) and CanCompute( C, "InjectionOfCofactorOfCoproductWithGivenCoproduct" ) then
                 AddCoproduct( KarEnvC,
                 function( KarEnvC, L )
@@ -220,7 +220,8 @@ InstallMethod( KaroubiEnvelope,
                 return MorphismConstructor( KarEnvC, coprod, UniversalMorphismFromCoproductWithGivenCoproduct( C, under_L, under_z, under_tao, under_coprod ), z );
                 end );
             fi;
-        elif HasIsCartesiaCategory( C ) and IsCartesianCategory( C ) then
+        elif HasIsCartesianCategory( C ) and IsCartesianCategory( C ) then
+        SetIsCartesianCategory( KarEnvC, true  );
         #TODO: add preservation of products
         fi;
 
@@ -238,24 +239,27 @@ InstallMethod( KaroubiEnvelope,
                 end );
             fi; 
 
-            if CanCompute( C, "UniversalMorphismFromZeroObject" ) then
+            if CanCompute( C, "UniversalMorphismFromZeroObjectWithGivenZeroObject" ) then
                 AddUniversalMorphismFromZeroObjectWithGivenZeroObject( KarEnvC,
                 function( KarEnvC, x, zero )
-                    local C, e_x, under_x;
+                    local C, e_x, under_x, under_zero;
                     C := UnderlyingCategory( KarEnvC );
                     e_x := IdempotentDatum( x );
                     under_x := Source( e_x );
-                    return MorphismConstructor( KarEnvC, zero, UniversalMorphismFromZeroObject( C, under_x ), x );
+                    under_zero := Source( IdempotentDatum( zero ) );
+                    return MorphismConstructor( KarEnvC, zero, UniversalMorphismFromZeroObjectWithGivenZeroObject( C, under_x, under_zero ), x );
                 end );
+            fi;
 
-                if CanCompute( C, "UniversalMorphismIntoZeroObject" ) then
+            if CanCompute( C, "UniversalMorphismIntoZeroObjectWithGivenZeroObject" ) then
                 AddUniversalMorphismIntoZeroObjectWithGivenZeroObject( KarEnvC,
                 function( KarEnvC, x, zero )
-                    local C, e_x, under_x;
+                    local C, e_x, under_x, under_zero;
                     C := UnderlyingCategory( KarEnvC );
                     e_x := IdempotentDatum( x );
                     under_x := Source( e_x );
-                    return MorphismConstructor( KarEnvC, zero, UniversalMorphismIntoZeroObject( C, under_x ), x );
+                    under_zero := Source( IdempotentDatum( zero ) );
+                    return MorphismConstructor( KarEnvC, zero, UniversalMorphismIntoZeroObjectWithGivenZeroObject( C, under_x, under_zero ), x );
                 end );
             fi;
         else
@@ -286,87 +290,96 @@ InstallMethod( KaroubiEnvelope,
             end );
         fi; 
 
-        if CanCompute( C, "TensorProductOnMorphisms" ) then
+        if CanCompute( C, "TensorProductOnMorphismsWithGivenTensorProducts" ) and CanCompute( C, "TensorProductOnObjects" ) then
             #note: tensor product on objects
             AddTensorProductOnObjects( KarEnvC,
             function ( KarEnvC, x, y )
-                local C, e_x, e_y;
+                local C, e_x, e_y, under_x, under_y, under_xy;
                 C := UnderlyingCategory( KarEnvC );
                 e_x := IdempotentDatum( x );
+                under_x := Source( e_x );
                 e_y := IdempotentDatum( y );
-                return ObjectConstructor( KarEnvC, TensorProductOnMorphisms( C, e_x, e_y ) );
+                under_y := Source( e_y );
+                under_xy := TensorProductOnObjects( C, under_x, under_y )
+                return ObjectConstructor( KarEnvC, TensorProductOnMorphismsWithGivenTensorProducts( C, under_xy, e_x, e_y, under_xy ) );
             end );
 
             #note: tensor product on morphisms
             AddTensorProductOnMorphismsWithGivenTensorProducts( KarEnvC,
             function ( KarEnvC, source, phi1, phi2, target )
-                local C, phi1_under, phi2_under;
+                local C, under_phi1, under_phi2, under_source, under_target;
                 C := UnderlyingCategory( KarEnvC );
-                phi1_under := UnderlyingMorphismDatum( phi1 );
-                phi2_under := UnderlyingMorphismDatum( phi2 );
-                return MorphismConstructor( KarEnvC, source, TensorProductOnMorphisms( C, phi1_under, phi2_under ), target );
+                under_phi1 := UnderlyingMorphismDatum( phi1 );
+                under_phi2 := UnderlyingMorphismDatum( phi2 );
+                under_source := Source( IdempotentDatum( source ) );
+                under_target := Source( IdempotentDatum( target ) );
+                return MorphismConstructor( KarEnvC, source, TensorProductOnMorphismsWithGivenTensorProducts( C, under_source, under_phi1, under_phi2, under_target ), target );
             end );
         fi;
 
         #note: left unitor
-        if CanCompute( C, "LeftUnitor") then
+        if CanCompute( C, "LeftUnitorWithGivenTensorProduct") then
             AddLeftUnitorWithGivenTensorProduct( KarEnvC, 
             function( KarEnvC, x, one_times_x )
-                local C, Karunit, e_x, under_x, leftunitor_under;
+                local C, Karunit, e_x, under_x, under_one_times_x, leftunitor_under;
                 C := UnderlyingCategory( KarEnvC );
                 e_x := IdempotentDatum( x );
                 under_x := Source(e_x);
-                leftunitor_under := LeftUnitor( under_x );
+                under_one_times_x := Source( IdempotentDatum( one_times_x ) );
+                leftunitor_under := LeftUnitorWithGivenTensorProduct( C, under_x, under_one_times_x );
                 return MorphismConstructor( KarEnvC, one_times_x, leftunitor_under, x );
             end );
         fi;
 
         #note: inverse of left unitor
-        if CanCompute( C, "LeftUnitorInverse") then
+        if CanCompute( C, "LeftUnitorInverseWithGivenTensorProduct") then
             AddLeftUnitorInverseWithGivenTensorProduct( KarEnvC, 
             function( KarEnvC, x, one_times_x )
-                local C, Karunit, e_x, under_x, leftunitorinv_under;
+                local C, Karunit, e_x, under_x, under_one_times_x, leftunitorinv_under;
                 C := UnderlyingCategory( KarEnvC );
                 e_x := IdempotentDatum( x );
                 under_x := Source(e_x);
-                leftunitorinv_under := LeftUnitorInverse( under_x );
+                under_one_times_x := Source( IdempotentDatum( one_times_x ) )
+                leftunitorinv_under := LeftUnitorInverseWithGivenTensorProduct( under_x );
                 return MorphismConstructor( KarEnvC, x, leftunitorinv_under, one_times_x );
             end );
         fi;
 
         #note: right unitor
-        if CanCompute( C, "RightUnitor") then
+        if CanCompute( C, "RightUnitorWithGivenTensorProduct") then
             AddRightUnitorWithGivenTensorProduct( KarEnvC, 
             function( KarEnvC, x, x_times_one )
-                local C, Karunit, e_x, under_x, rightunitor_under;
+                local C, Karunit, e_x, under_x_times_one, under_x, rightunitor_under;
                 C := UnderlyingCategory( KarEnvC );
                 e_x := IdempotentDatum( x );
                 under_x := Source(e_x);
-                rightunitor_under := RightUnitor( C, under_x );
+                under_x_times_one := Source( IdempotentDatum( x_times_one ) );
+                rightunitor_under := RightUnitorWithGivenTensorProduct( C, under_x, under_x_times_one );
                 return MorphismConstructor( KarEnvC, x_times_one, rightunitor_under, x );
             end );
         fi;
 
         #note: inverse of right unitor
-        if CanCompute( C, "RightUnitorInverse") then
+        if CanCompute( C, "RightUnitorInverseWithGivenTensorProduct") then
             AddRightUnitorInverseWithGivenTensorProduct( KarEnvC, 
             function( KarEnvC, x, x_times_one )
-                local C, Karunit, e_x, under_x, rightunitorinv_under;
+                local C, Karunit, e_x, under_x, x_times_one, rightunitorinv_under;
                 C := UnderlyingCategory( KarEnvC );
                 e_x := IdempotentDatum( x );
                 under_x := Source(e_x);
-                rightunitorinv_under := RightUnitorInverse( under_x );
+                under_x_times_one := Source( IdempotentDatum( x_times_one ) );
+                rightunitorinv_under := RightUnitorInverseWithGivenTensorProduct( C, under_x, under_x_times_one );
                 return MorphismConstructor( KarEnvC, x, rightunitorinv_under, x_times_one );
             end );
         fi;
 
         #note: associator from right to left
-        if CanCompute( C, "AssociatorRightToLeft" ) then
+        if CanCompute( C, "AssociatorRightToLeftWithGivenTensorProduct" ) then
             AddAssociatorRightToLeftWithGivenTensorProducts( KarEnvC, 
             function( KarEnvC, source, x, y, z, target )
                 #source = x otimes ( y otimes z )
                 #target = ( x otimes y ) otimes z 
-                local C, e_x, e_y, e_z, under_x, under_y, under_z;
+                local C, e_x, e_y, e_z, under_x, under_y, under_z, under_source, under_target;
                 C := UnderlyingCategory( KarEnvC );
                 e_x := IdempotentDatum( x );
                 under_x := Source( e_x );
@@ -374,17 +387,19 @@ InstallMethod( KaroubiEnvelope,
                 under_y := Source( e_y );
                 e_z := IdempotentDatum( z );
                 under_z := Source( e_z );
-                return MorphismConstructor( KarEnvC, source, AssociatorRightToLeft( under_x, under_y, under_z ), target );
+                under_source := Source( IdempotentDatum( source ) );
+                under_target := Source( IdempotentDatum( target ) );
+                return MorphismConstructor( KarEnvC, source, AssociatorRightToLeftWithGivenTensorProduct( C, under_source, under_x, under_y, under_z, under_target ), target );
             end );
         fi;
 
         #note: associator from left to right
-        if CanCompute( C, "AssociatorLeftToRight" ) then
+        if CanCompute( C, "AssociatorLeftToRightWithGivenTensorProducts" ) then
             AddAssociatorLeftToRightWithGivenTensorProducts( KarEnvC, 
             function( KarEnvC, source, x, y, z, target )
                 #source = ( x otimes y ) otimes z 
                 #target = x otimes ( y otimes z )
-                local C, e_x, e_y, e_z, under_x, under_y, under_z;
+                local C, e_x, e_y, e_z, under_x, under_y, under_z, under_source, under_target;
                 C := UnderlyingCategory( KarEnvC );
                 e_x := IdempotentDatum( x );
                 under_x := Source( e_x );
@@ -392,7 +407,9 @@ InstallMethod( KaroubiEnvelope,
                 under_y := Source( e_y );
                 e_z := IdempotentDatum( z );
                 under_z := Source( e_z );
-                return MorphismConstructor( KarEnvC, source, AssociatorLeftToRight( under_x, under_y, under_z ), target );
+                under_source := Source( IdempotentDatum( source ) );
+                under_target := Source( IdempotentDatum( target ) );
+                return MorphismConstructor( KarEnvC, source, AssociatorLeftToRightWithGivenTensorProducts( C, under_source, under_x, under_y, under_z, under_target ), target );
             end );
         fi;
         

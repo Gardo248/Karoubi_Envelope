@@ -1,3 +1,4 @@
+LoadPackage( "CartesianCategories", false );
 LoadPackage( "CAP", false );
 LoadPackage( "LinearAlgebraForCAP", false );
 
