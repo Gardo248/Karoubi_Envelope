@@ -333,7 +333,7 @@ InstallMethod( KaroubiEnvelope,
                 under_x := Source( e_x );
                 e_y := IdempotentDatum( y );
                 under_y := Source( e_y );
-                under_xy := TensorProductOnObjects( C, under_x, under_y )
+                under_xy := TensorProductOnObjects( C, under_x, under_y );
                 return ObjectConstructor( KarEnvC, TensorProductOnMorphismsWithGivenTensorProducts( C, under_xy, e_x, e_y, under_xy ) );
             end );
 
@@ -372,7 +372,7 @@ InstallMethod( KaroubiEnvelope,
                 C := UnderlyingCategory( KarEnvC );
                 e_x := IdempotentDatum( x );
                 under_x := Source(e_x);
-                under_one_times_x := Source( IdempotentDatum( one_times_x ) )
+                under_one_times_x := Source( IdempotentDatum( one_times_x ) );
                 leftunitorinv_under := LeftUnitorInverseWithGivenTensorProduct( under_x );
                 return MorphismConstructor( KarEnvC, x, leftunitorinv_under, one_times_x );
             end );
@@ -396,7 +396,7 @@ InstallMethod( KaroubiEnvelope,
         if CanCompute( C, "RightUnitorInverseWithGivenTensorProduct") then
             AddRightUnitorInverseWithGivenTensorProduct( KarEnvC, 
             function( KarEnvC, x, x_times_one )
-                local C, Karunit, e_x, under_x, x_times_one, rightunitorinv_under;
+                local C, Karunit, e_x, under_x, under_x_times_one, rightunitorinv_under;
                 C := UnderlyingCategory( KarEnvC );
                 e_x := IdempotentDatum( x );
                 under_x := Source(e_x);
@@ -407,7 +407,7 @@ InstallMethod( KaroubiEnvelope,
         fi;
 
         #note: associator from right to left
-        if CanCompute( C, "AssociatorRightToLeftWithGivenTensorProduct" ) then
+        if CanCompute( C, "AssociatorRightToLeftWithGivenTensorProducts" ) then
             AddAssociatorRightToLeftWithGivenTensorProducts( KarEnvC, 
             function( KarEnvC, source, x, y, z, target )
                 #source = x otimes ( y otimes z )
@@ -422,7 +422,7 @@ InstallMethod( KaroubiEnvelope,
                 under_z := Source( e_z );
                 under_source := Source( IdempotentDatum( source ) );
                 under_target := Source( IdempotentDatum( target ) );
-                return MorphismConstructor( KarEnvC, source, AssociatorRightToLeftWithGivenTensorProduct( C, under_source, under_x, under_y, under_z, under_target ), target );
+                return MorphismConstructor( KarEnvC, source, AssociatorRightToLeftWithGivenTensorProducts( C, under_source, under_x, under_y, under_z, under_target ), target );
             end );
         fi;
 
