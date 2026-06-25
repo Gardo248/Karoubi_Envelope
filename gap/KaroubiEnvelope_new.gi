@@ -178,6 +178,8 @@ InstallMethod( KaroubiEnvelope,
     if HasIsAdditiveCategory( C ) and IsAdditiveCategory( C ) then
         SetIsAdditiveCategory( KarEnvC, true  );
         #TODO: write the preservation of additive structure
+
+        #we define the zero object for additive category
         if CanCompute( C, "ZeroObject" ) then
             AddZeroObject(  KarEnvC, 
             function( KarEnvC )
@@ -224,8 +226,9 @@ InstallMethod( KaroubiEnvelope,
                     e_L := List( L, x -> IdempotentDatum( x ) );
                     under_L := List( e_L, e_x -> Source( e_x ) );
                     coprod_under_L := Coproduct( C, under_L );
-                    idempotent_of_coproduct := UniversalMorphismFromCoproductWithGivenCoproduct( C, under_L, coprod_under_L,
-                                        List( [ 1 .. Length( under_L ) ], k -> PreCompose( C, e_L[k], InjectionOfCofactorOfCoproductWithGivenCoproduct( C, under_L, k, coprod_under_L ) ) ), coprod_under_L );
+                    idempotent_of_coproduct := CoproductFunctorialWithGivenCoproducts( C, coprod_under_L,
+                                    List( [ 1 .. Length( under_L ) ], k -> PreCompose( C, e_L[k], InjectionOfCofactorOfCoproductWithGivenCoproduct( C, under_L, k, coprod_under_L ) ) ),
+                                    coprod_under_L );
                     return ObjectConstructor( KarEnvC, idempotent_of_coproduct );
                 end );
 
