@@ -1,6 +1,7 @@
 LoadPackage( "CartesianCategories", false );
 LoadPackage( "CAP", false );
 LoadPackage( "LinearAlgebraForCAP", false );
+LoadPackage( "FinSetsForCAP", false );
 
 #LoadPackage( "KaroubiEnvelope" );
 Read( "../gap/KaroubiEnvelope_new.gd" );
