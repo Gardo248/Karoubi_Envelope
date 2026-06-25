@@ -177,7 +177,6 @@ InstallMethod( KaroubiEnvelope,
     #todo: if it is additive then derive the product and coproduct directly, else if it is cartesian or cocartesian derive it separately, also the zeroobject will be in the else stuff
     if HasIsAdditiveCategory( C ) and IsAdditiveCategory( C ) then
         SetIsAdditiveCategory( KarEnvC, true  );
-        #TODO: write the preservation of additive structure
 
         #we define the zero object for additive category
         if CanCompute( C, "ZeroObject" ) then
@@ -190,6 +189,7 @@ InstallMethod( KaroubiEnvelope,
             end );
         fi; 
 
+        #we define the universal morphism from the zero object into any other object of the category
         if CanCompute( C, "UniversalMorphismFromZeroObjectWithGivenZeroObject" ) then
             AddUniversalMorphismFromZeroObjectWithGivenZeroObject( KarEnvC,
             function( KarEnvC, x, zero )
@@ -202,6 +202,7 @@ InstallMethod( KaroubiEnvelope,
             end );
         fi;
 
+        #we define the universal morphism from any object of the category into the zero object
         if CanCompute( C, "UniversalMorphismIntoZeroObjectWithGivenZeroObject" ) then
             AddUniversalMorphismIntoZeroObjectWithGivenZeroObject( KarEnvC,
             function( KarEnvC, x, zero )
@@ -214,9 +215,10 @@ InstallMethod( KaroubiEnvelope,
             end );
         fi;
 
-        if CanCompute( C, "DirectSum" ) and CanCompute( "DirectSumFunctorialWithGivenCoproducts" ) and 
+        if CanCompute( C, "DirectSum" ) and CanCompute( C, "DirectSumFunctorialWithGivenDirectSums" ) and 
         CanCompute( C, "InjectionOfCofactorOfDirectSumWithGivenDirectSum" ) and CanCompute( C, "UniversalMorphismFromDirectSumWithGivenDirectSum" ) and 
         CanCompute( C, "ProjectionInFactorOfDirectSumWithGivenDirectSum" ) and CanCompute( C, "UniversalMorphismIntoDirectSumWithGivenDirectSum" ) then
+
             #we define the direct sum of a list of objects in the Karoubi envelope relying on the direct sum of the underlying category C
             AddDirectSum( KarEnvC,
             #Q: in the case of the direct sum, I could define the k-th element defining the idempotent of the direct sum either as Precompose( C, e_L[k], InjectionOfCofactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ) ) ) or as Precompose( C, ProjectionInFactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ), e_L[k] ) ). I believe that the two are both equal to the morphism Precompose( C, ProjectionInFactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ), Precompose( C, e_L[k], InjectionOfCofactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ) ) ) ). Is it smart to use this form in the implementation? It allows you not to choose between one or the other, but makes the code more complicated
@@ -226,14 +228,14 @@ InstallMethod( KaroubiEnvelope,
                 e_L := List( L, x -> IdempotentDatum( x ) );
                 under_L := List( e_L, e_x -> Source( e_x ) );
                 dirsum_under_L := DirectSum( C, under_L );
-                idempotent_of_dirsum := DirectSumFunctorialWithGivenCoproducts( C, coprod_under_L,
-                                List( [ 1 .. Length( under_L ) ], k -> Precompose( C, e_L[k], InjectionOfCofactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ) ) ),
+                idempotent_of_dirsum := DirectSumFunctorialWithGivenDirectSums( C, dirsum_under_L,
+                                List( [ 1 .. Length( under_L ) ], k -> PreCompose( C, e_L[k], InjectionOfCofactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ) ) ),
                                 dirsum_under_L );
                 return ObjectConstructor( KarEnvC, idempotent_of_dirsum );
             end );
 
             #we define the injection into the direct sum of a list of objects
-            AddInjectionOfCofactorOfDirectSumWithGivenDirectSum( KarEnvC
+            AddInjectionOfCofactorOfDirectSumWithGivenDirectSum( KarEnvC,
             function( KarEnvC, L, k, dirsum )
                 local C, e_L, under_L, under_dirsum;
                 C := UnderlyingCategory( KarEnvC );
@@ -259,7 +261,7 @@ InstallMethod( KaroubiEnvelope,
             end );
 
             #we define the projection from the direct sum of a list of objects
-            AddProjectionInFactorOfDirectSumWithGivenDirectSum( KarEnvC
+            AddProjectionInFactorOfDirectSumWithGivenDirectSum( KarEnvC,
             function( KarEnvC, L, k, dirsum )
                 local C, e_L, under_L, under_dirsum;
                 C := UnderlyingCategory( KarEnvC );
@@ -286,10 +288,14 @@ InstallMethod( KaroubiEnvelope,
         fi;
         
     else
+        #preservation of cocartesian structure
         if HasIsCocartesianCategory( C ) and IsCocartesianCategory( C ) then
+
             SetIsCocartesianCategory( KarEnvC, true  );
+
             if CanCompute( C, "Coproduct" ) and CanCompute( C, "UniversalMorphismFromCoproductWithGivenCoproduct" ) and
             CanCompute( C, "InjectionOfCofactorOfCoproductWithGivenCoproduct" ) and CanCompute( C, "CoproductFunctorialWithGivenCoproducts" ) then
+
                 AddCoproduct( KarEnvC,
                 function( KarEnvC, L )
                     local C, e_L, under_L, coprod_under_L, idempotent_of_coproduct;
@@ -327,15 +333,20 @@ InstallMethod( KaroubiEnvelope,
                     return MorphismConstructor( KarEnvC, coprod, UniversalMorphismFromCoproductWithGivenCoproduct( C, under_L, under_z, under_tao, under_coprod ), z );
                 end );
             fi;
+
+        #preservation of cartesian structure
         elif HasIsCartesianCategory( C ) and IsCartesianCategory( C ) then
+
         SetIsCartesianCategory( KarEnvC, true  );
         #TODO: add preservation of products
         fi;
 
-        #note: preservation of zero object
+        #preservation of zero object
         if HasIsCategoryWithZeroObject( C ) and IsCategoryWithZeroObject( C ) then
+
             SetIsCategoryWithZeroObject( KarEnvC, true );
 
+            #we define the zero object
             if CanCompute( C, "ZeroObject" ) then
                 AddZeroObject(  KarEnvC, 
                 function( KarEnvC )
@@ -346,6 +357,7 @@ InstallMethod( KaroubiEnvelope,
                 end );
             fi; 
 
+            #we define the universal morphism from the zero object into any other object of the category
             if CanCompute( C, "UniversalMorphismFromZeroObjectWithGivenZeroObject" ) then
                 AddUniversalMorphismFromZeroObjectWithGivenZeroObject( KarEnvC,
                 function( KarEnvC, x, zero )
@@ -358,7 +370,9 @@ InstallMethod( KaroubiEnvelope,
                 end );
             fi;
 
+            #we define the universal morphism from any object of the category into the zero object
             if CanCompute( C, "UniversalMorphismIntoZeroObjectWithGivenZeroObject" ) then
+
                 AddUniversalMorphismIntoZeroObjectWithGivenZeroObject( KarEnvC,
                 function( KarEnvC, x, zero )
                     local C, e_x, under_x, under_zero;
@@ -371,10 +385,15 @@ InstallMethod( KaroubiEnvelope,
             fi;
         else
             if HasIsCategoryWithTerminalObject( C ) and IsCategoryWithTerminalObject( C ) then
+
+                #TODO: add the preservation of terminal object category
                 SetIsCategoryWithTerminalObject( KarEnvC, true );
 
             elif HasIsCategoryWithInitialObject( C ) and IsCategoryWithInitialObject( C ) then
+
+                #TODO: add the preservation of initial object category
                 SetIsCategoryWithInitialObject( KarEnvC, true );
+
             fi;
         fi;
     fi;
