@@ -219,6 +219,7 @@ InstallMethod( KaroubiEnvelope,
         CanCompute( C, "ProjectionInFactorOfDirectSumWithGivenDirectSum" ) and CanCompute( C, "UniversalMorphismIntoDirectSumWithGivenDirectSum" ) then
             #we define the direct sum of a list of objects in the Karoubi envelope relying on the direct sum of the underlying category C
             AddDirectSum( KarEnvC,
+            #Q: in the case of the direct sum, I could define the k-th element defining the idempotent of the direct sum either as Precompose( C, e_L[k], InjectionOfCofactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ) ) ) or as Precompose( C, ProjectionInFactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ), e_L[k] ) ). I believe that the two are both equal to the morphism Precompose( C, ProjectionInFactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ), Precompose( C, e_L[k], InjectionOfCofactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ) ) ) ). Is it smart to use this form in the implementation? It allows you not to choose between one or the other, but makes the code more complicated
             function( KarEnvC, L )
                 local C, e_L, under_L, dirsum_under_L, idempotent_of_dirsum;
                 C := UnderlyingCategory( KarEnvC );
@@ -226,7 +227,7 @@ InstallMethod( KaroubiEnvelope,
                 under_L := List( e_L, e_x -> Source( e_x ) );
                 dirsum_under_L := DirectSum( C, under_L );
                 idempotent_of_dirsum := DirectSumFunctorialWithGivenCoproducts( C, coprod_under_L,
-                                List( [ 1 .. Length( under_L ) ], k -> PreCompose( C, e_L[k], InjectionOfCofactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ) ) ),
+                                List( [ 1 .. Length( under_L ) ], k -> Precompose( C, e_L[k], InjectionOfCofactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ) ) ),
                                 dirsum_under_L );
                 return ObjectConstructor( KarEnvC, idempotent_of_dirsum );
             end );
@@ -239,35 +240,51 @@ InstallMethod( KaroubiEnvelope,
                 e_L := List( L, x -> IdempotentDatum( x ) );
                 under_L := List( e_L, e_x -> Source( e_x ) );
                 under_dirsum := Source( IdempotentDatum( dirsum ) );
-                return MorphismConstructor( KarEnvC, L[k], PreCompose( C, e_L[k], UniversalMorphismFromDirectSumWithGivenDirectSum( C, under_L, k, under_dirsum ) ), dirsum ); 
+                return MorphismConstructor( KarEnvC, L[k], PreCompose( C, e_L[k], InjectionOfCofactorOfDirectSumWithGivenDirectSum( C, under_L, k, under_dirsum ) ), dirsum ); 
             end );
 
-            #we define the universal morphism from the coproduct of a list of objects induced by a list of morphisms into an object z
+            #we define the universal morphism from the direct sum of a list of objects induced by a list of morphisms into an object z
             AddUniversalMorphismFromDirectSumWithGivenDirectSum( KarEnvC,
-                function( KarEnvC, L, z, tao, dirsum )
-                    local C, e_L, under_L, under_tao, e_z, under_z, under_dirsum;
-                    C := UnderlyingCategory( KarEnvC );
-                    e_L := List( L, x -> IdempotentDatum( x ) );
-                    under_L := List( e_L, e_x -> Source( e_x ) );
-                    under_tao := List( tao, phi -> UnderlyingMorphismDatum( phi ) );
-                    e_z := IdempotentDatum( z );
-                    under_z := Source( e_z );
-                    under_dirsum := Source( IdempotentDatum( dirsum ) );
-                    #note: the element phi = under_tao[k] in under_tao are morphism commuting with the idempotents, i.e. PreCompose( Precompose( e_z, phi ), e_L[k] ) 
-                    return MorphismConstructor( KarEnvC, dirsum, UniversalMorphismFromCoproductWithGivenCoproduct( C, under_L, under_z, under_tao, under_dirsum ), z );
-                end );
-        fi;
+            function( KarEnvC, L, z, tao, dirsum )
+                local C, e_L, under_L, under_tao, e_z, under_z, under_dirsum;
+                C := UnderlyingCategory( KarEnvC );
+                e_L := List( L, x -> IdempotentDatum( x ) );
+                under_L := List( e_L, e_x -> Source( e_x ) );
+                under_tao := List( tao, phi -> UnderlyingMorphismDatum( phi ) );
+                e_z := IdempotentDatum( z );
+                under_z := Source( e_z );
+                under_dirsum := Source( IdempotentDatum( dirsum ) );
+                #mathematically it is true that this morphism is a well defined morphism in KarEnvC
+                return MorphismConstructor( KarEnvC, dirsum, UniversalMorphismFromDirectSumWithGivenDirectSum( C, under_L, under_z, under_tao, under_dirsum ), z );
+            end );
 
-        #we define the projection from the direct sum of a list of objects
-        # AddProjectionInFactorOfDirectSumWithGivenDirectSum( KarEnvC
-        #     function( KarEnvC, L, k, dirsum )
-        #         local C, e_L, under_L, under_dirsum;
-        #         C := UnderlyingCategory( KarEnvC );
-        #         e_L := List( L, x -> IdempotentDatum( x ) );
-        #         under_L := List( e_L, e_x -> Source( e_x ) );
-        #         under_dirsum := Source( IdempotentDatum( dirsum ) );
-        #         return MorphismConstructor( KarEnvC, L[k], PreCompose( C, e_L[k], UniversalMorphismFromDirectSumWithGivenDirectSum( C, under_L, k, under_dirsum ) ), dirsum ); 
-        #     end );
+            #we define the projection from the direct sum of a list of objects
+            AddProjectionInFactorOfDirectSumWithGivenDirectSum( KarEnvC
+            function( KarEnvC, L, k, dirsum )
+                local C, e_L, under_L, under_dirsum;
+                C := UnderlyingCategory( KarEnvC );
+                e_L := List( L, x -> IdempotentDatum( x ) );
+                under_L := List( e_L, e_x -> Source( e_x ) );
+                under_dirsum := Source( IdempotentDatum( dirsum ) );
+                return MorphismConstructor( KarEnvC, dirsum, PreCompose( C, ProjectionInFactorOfDirectSumWithGivenDirectSum( C, under_L, k, under_dirsum ), e_L[k] ), L[k] ); 
+            end );
+
+            #we define the universal morphism into the direct sum of a list of objects induced by a list of morphisms from an object z
+            AddUniversalMorphismIntoDirectSumWithGivenDirectSum( KarEnvC,
+            function( KarEnvC, L, z, tao, dirsum )
+                local C, e_L, under_L, under_tao, e_z, under_z, under_dirsum;
+                C := UnderlyingCategory( KarEnvC );
+                e_L := List( L, x -> IdempotentDatum( x ) );
+                under_L := List( e_L, e_x -> Source( e_x ) );
+                under_tao := List( tao, phi -> UnderlyingMorphismDatum( phi ) );
+                e_z := IdempotentDatum( z );
+                under_z := Source( e_z );
+                under_dirsum := Source( IdempotentDatum( dirsum ) );
+                #mathematically it is true that this morphism is a well defined morphism in KarEnvC
+                return MorphismConstructor( KarEnvC, z, UniversalMorphismIntoDirectSumWithGivenDirectSum( C, under_L, under_z, under_tao, under_dirsum ), dirsum );
+            end );
+        fi;
+        
     else
         if HasIsCocartesianCategory( C ) and IsCocartesianCategory( C ) then
             SetIsCocartesianCategory( KarEnvC, true  );
@@ -293,7 +310,7 @@ InstallMethod( KaroubiEnvelope,
                     e_L := List( L, x -> IdempotentDatum( x ) );
                     under_L := List( e_L, e_x -> Source( e_x ) );
                     under_coprod := Source( IdempotentDatum( coprod ) );
-                    return MorphismConstructor( KarEnvC, L[k], PreCompose( C, e_L[k], UniversalMorphismFromCoproductWithGivenCoproduct( C, under_L, k, under_coprod ) ), coprod ); 
+                    return MorphismConstructor( KarEnvC, L[k], PreCompose( C, e_L[k], InjectionOfCofactorOfCoproductWithGivenCoproduct( C, under_L, k, under_coprod ) ), coprod ); 
                 end );
 
                 AddUniversalMorphismFromCoproductWithGivenCoproduct( KarEnvC,
