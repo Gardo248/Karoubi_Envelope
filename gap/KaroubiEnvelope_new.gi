@@ -83,15 +83,15 @@ InstallMethod( KaroubiEnvelope,
     if CanCompute( C, "IsWellDefinedForMorphismsWithGivenSourceAndRange" ) and CanCompute( C, "IsCongruentForMorphisms" ) and CanCompute( C, "IsWellDefinedForObjects" ) then
             AddIsWellDefinedForMorphisms( KarEnvC,
                 function ( KarEnvC, f )
-                    local C, f_u, s_u, t_u, e_s, e_t;
+                    local C, f_u, under_s, under_t, e_s, e_t;
                     C := UnderlyingCategory( KarEnvC );
                     f_u := UnderlyingMorphismDatum( f );
                     e_s := IdempotentDatum( Source( f ) );
                     e_t := IdempotentDatum( Target ( f ) );
-                    s_u := Source ( e_s );
-                    t_u := Source ( e_t );
-                    return IsWellDefinedForMorphismsWithGivenSourceAndRange( C, s_u, f_u, t_u ) and IsWellDefinedForObjects( C, s_u ) and
-                    IsWellDefinedForObjects( C, t_u ) and IsCongruentForMorphisms( f_u, PreCompose( e_s, PreCompose( f_u, e_t ) ) );
+                    under_s := Source ( e_s );
+                    under_t := Source ( e_t );
+                    return IsWellDefinedForMorphismsWithGivenSourceAndRange( C, under_s, f_u, under_t ) and IsWellDefinedForObjects( C, under_s ) and
+                    IsWellDefinedForObjects( C, under_t ) and IsCongruentForMorphisms( f_u, PreCompose( e_s, PreCompose( f_u, e_t ) ) );
                 end );
         fi;
 
@@ -107,21 +107,17 @@ InstallMethod( KaroubiEnvelope,
             function ( KarEnvC, f, g )
                 #    f     g
                 # x --> y --> z
-                local C, x, z, f_under, g_under;
+                local C, x, z, under_f, under_g;
                 C := UnderlyingCategory( KarEnvC );
                 x := Source( f ) ;
                 z := Target( g );
-                f_under := UnderlyingMorphismDatum( f );
-                g_under := UnderlyingMorphismDatum( g );
-                return MorphismConstructor( KarEnvC, x, PreCompose( C, f_under, g_under ), z );
+                under_f := UnderlyingMorphismDatum( f );
+                under_g := UnderlyingMorphismDatum( g );
+                return MorphismConstructor( KarEnvC, x, PreCompose( C, under_f, under_g ), z );
             end );
 
-    #note: from now on we implement the preservation of structures of the underlying category C
-
-    #TODO: check in example/test file that righ unitor and its inverse are effectively inverses, same for the left one
-
-    #note: preservation of pre-additive structure
-    
+    #from now on we implement the preservation of structures of the underlying category C
+    #preservation of pre-additive structure
     if HasIsAbCategory( C ) and IsAbCategory( C ) then
         SetIsAbCategory( KarEnvC, true );
 
@@ -292,6 +288,7 @@ InstallMethod( KaroubiEnvelope,
         if HasIsCocartesianCategory( C ) and IsCocartesianCategory( C ) then
 
             SetIsCocartesianCategory( KarEnvC, true  );
+            #TODO: complete the cocartesian structure
 
             if CanCompute( C, "Coproduct" ) and CanCompute( C, "UniversalMorphismFromCoproductWithGivenCoproduct" ) and
             CanCompute( C, "InjectionOfCofactorOfCoproductWithGivenCoproduct" ) and CanCompute( C, "CoproductFunctorialWithGivenCoproducts" ) then
@@ -337,8 +334,48 @@ InstallMethod( KaroubiEnvelope,
         #preservation of cartesian structure
         elif HasIsCartesianCategory( C ) and IsCartesianCategory( C ) then
 
-        SetIsCartesianCategory( KarEnvC, true  );
-        #TODO: add preservation of products
+            SetIsCartesianCategory( KarEnvC, true );
+
+            #TODO: complete the cartesian structure
+            if CanCompute( C, "DirectProduct" ) and CanCompute( C, "UniversalMorphismIntoDirectProductWithGivenDirectProduct" ) and
+            CanCompute( C, "ProjectionInFactorOfDirectProductWithGivenDirectProduct" ) and CanCompute( C, "DirectProductFunctorialWithGivenDirectProducts" ) then
+
+                AddDirectProduct( KarEnvC,
+                function( KarEnvC, L )
+                    local C, e_L, under_L, dirprod_under_L, idempotent_of_dirproduct;
+                    C := UnderlyingCategory( KarEnvC );
+                    e_L := List( L, x -> IdempotentDatum( x ) );
+                    under_L := List( e_L, e_x -> Source( e_x ) );
+                    dirprod_under_L := DirectProduct( C, under_L );
+                    idempotent_of_dirproduct := DirectProductFunctorialWithGivenDirectProducts( C, dirprod_under_L,
+                                    List( [ 1 .. Length( under_L ) ], k -> PreCompose( C, ProjectionInFactorOfDirectProductWithGivenDirectProduct( C, under_L, k, dirprod_under_L ), e_L[k] ) ),
+                                    dirprod_under_L );
+                    return ObjectConstructor( KarEnvC, idempotent_of_dirproduct );
+                end );
+
+                AddProjectionInFactorOfDirectProductWithGivenDirectProduct( KarEnvC,
+                function( KarEnvC, L, k, dirprod )
+                    local C, e_L, under_L, under_dirprod;
+                    C := UnderlyingCategory( KarEnvC );
+                    e_L := List( L, x -> IdempotentDatum( x ) );
+                    under_L := List( e_L, e_x -> Source( e_x ) );
+                    under_dirprod := Source( IdempotentDatum( dirprod ) );
+                    return MorphismConstructor( KarEnvC, dirprod, PreCompose( C, ProjectionInFactorOfDirectProductWithGivenDirectProduct( C, under_L, k, under_dirprod ), e_L[k] ), L[k] ); 
+                end );
+
+                AddUniversalMorphismIntoDirectProductWithGivenDirectProduct( KarEnvC,
+                function( KarEnvC, L, z, tao, dirprod )
+                    local C, e_L, under_L, under_tao, e_z, under_z, under_dirprod;
+                    C := UnderlyingCategory( KarEnvC );
+                    e_L := List( L, x -> IdempotentDatum( x ) );
+                    under_L := List( e_L, e_x -> Source( e_x ) );
+                    under_tao := List( tao, phi -> UnderlyingMorphismDatum( phi ) );
+                    e_z := IdempotentDatum( z );
+                    under_z := Source( e_z );
+                    under_dirprod := Source( IdempotentDatum( dirprod ) );
+                    return MorphismConstructor( KarEnvC, z, UniversalMorphismIntoDirectProductWithGivenDirectProduct( C, under_L, under_z, under_tao, under_dirprod ), dirprod );
+                end );
+            fi;
         fi;
 
         #preservation of zero object
