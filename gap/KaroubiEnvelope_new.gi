@@ -330,9 +330,10 @@ InstallMethod( KaroubiEnvelope,
                     return MorphismConstructor( KarEnvC, coprod, UniversalMorphismFromCoproductWithGivenCoproduct( C, under_L, under_z, under_tao, under_coprod ), z );
                 end );
             fi;
+        fi;
 
         #preservation of cartesian structure
-        elif HasIsCartesianCategory( C ) and IsCartesianCategory( C ) then
+        if HasIsCartesianCategory( C ) and IsCartesianCategory( C ) then
 
             SetIsCartesianCategory( KarEnvC, true );
 
@@ -385,7 +386,7 @@ InstallMethod( KaroubiEnvelope,
 
             #we define the zero object
             if CanCompute( C, "ZeroObject" ) then
-                AddZeroObject(  KarEnvC, 
+                AddZeroObject( KarEnvC, 
                 function( KarEnvC )
                     local C, zero_C;
                     C := UnderlyingCategory( KarEnvC );
@@ -417,19 +418,69 @@ InstallMethod( KaroubiEnvelope,
                     e_x := IdempotentDatum( x );
                     under_x := Source( e_x );
                     under_zero := Source( IdempotentDatum( zero ) );
-                    return MorphismConstructor( KarEnvC, zero, UniversalMorphismIntoZeroObjectWithGivenZeroObject( C, under_x, under_zero ), x );
+                    return MorphismConstructor( KarEnvC, x, UniversalMorphismIntoZeroObjectWithGivenZeroObject( C, under_x, under_zero ), zero );
                 end );
             fi;
         else
+            #preservation of the terminal object
             if HasIsCategoryWithTerminalObject( C ) and IsCategoryWithTerminalObject( C ) then
 
                 #TODO: add the preservation of terminal object category
                 SetIsCategoryWithTerminalObject( KarEnvC, true );
 
-            elif HasIsCategoryWithInitialObject( C ) and IsCategoryWithInitialObject( C ) then
+                #we define the terminal object
+                if CanCompute( C, "TerminalObject" ) then
+                    AddTerminalObject( KarEnvC, 
+                    function( KarEnvC )
+                        local C, terminal_C;
+                        C := UnderlyingCategory( KarEnvC );
+                        terminal_C := TerminalObject( C );
+                        return ObjectConstructor( KarEnvC, IdentityMorphism( C, terminal_C ) );
+                    end );
+                fi;
+
+                #we define the universal morphism from any object of the category into the terminal object
+                if CanCompute( C, "UniversalMorphismIntoTerminalObjectWithGivenTerminalObject" ) then
+                    AddUniversalMorphismIntoTerminalObjectWithGivenTerminalObject( KarEnvC,
+                    function( KarEnvC, x, terminal )
+                        local C, e_x, under_x, under_terminal;
+                        C := UnderlyingCategory( KarEnvC );
+                        e_x := IdempotentDatum( x );
+                        under_x := Source( e_x );
+                        under_terminal := Source( IdempotentDatum( terminal ) );
+                        return MorphismConstructor( KarEnvC, x, UniversalMorphismIntoTerminalObjectWithGivenTerminalObject( C, under_x, under_terminal ), terminal );
+                    end );
+                fi;
+            fi;
+
+            if HasIsCategoryWithInitialObject( C ) and IsCategoryWithInitialObject( C ) then
 
                 #TODO: add the preservation of initial object category
                 SetIsCategoryWithInitialObject( KarEnvC, true );
+
+                #we define the initial object
+                if CanCompute( C, "InitialObject" ) then
+                    AddInitialObject( KarEnvC, 
+                    function( KarEnvC )
+                        local C, initial_C;
+                        C := UnderlyingCategory( KarEnvC );
+                        initial_C := InitialObject( C );
+                        return ObjectConstructor( KarEnvC, IdentityMorphism( C, initial_C ) );
+                    end );
+                fi; 
+
+                #we define the universal morphism from the initial object into any other object of the category
+                if CanCompute( C, "UniversalMorphismFromInitialObjectWithGivenInitialObject" ) then
+                    AddUniversalMorphismFromInitialObjectWithGivenInitialObject( KarEnvC,
+                    function( KarEnvC, x, initial )
+                        local C, e_x, under_x, under_initial;
+                        C := UnderlyingCategory( KarEnvC );
+                        e_x := IdempotentDatum( x );
+                        under_x := Source( e_x );
+                        under_initial := Source( IdempotentDatum( initial ) );
+                        return MorphismConstructor( KarEnvC, initial, UniversalMorphismFromInitialObjectWithGivenInitialObject( C, under_x, under_initial ), x );
+                    end );
+                fi;
 
             fi;
         fi;
