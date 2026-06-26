@@ -63,7 +63,7 @@ fA = TensorProduct( fA, one );
 IsCongruentForMorphisms( psi, TensorProduct( IdentityMorphism( one ), psi ) );
 #true
 
-phipsi := TensorProduct( psi, phi );
+psiphi := TensorProduct( psi, phi );
 #a morphism in KaroubiEnvelope(Category of matices over Q)
 
 MorphismDatum( TensorProduct( psi, phi ) );
@@ -77,7 +77,7 @@ MorphismDatum( TensorProduct( psi, phi ) );
 Source( TensorProduct( psi, phi ) );
 #an object in KaroubiEnvelope(Category of matrices over Q)
 
-IsEqualForMorphisms( TensorProduct( i, f ), IdempotentDatum( Source( phipsi ) ) );
+IsEqualForMorphisms( TensorProduct( i, f ), IdempotentDatum( Source( psiphi ) ) );
 #true
 
 #TODO: add examples with unitors and associators
@@ -100,5 +100,32 @@ TensorProduct( zero_ef, zero_zero + zero_zero ) = zero_zero;
 PreCompose( IdentityMorphism( iA ), psi ) - psi = ZeroMorphism(iA, fA);
 #true
 
+eta := MorphismConstructor( eA, e, eA );
+
+gamma := MorphismConstructor( iA, f, eA );
+
+efA := DirectSum( [ eA, fA ] );
+
+fiA := DirectSum( [ fA, iA ] );
+
+eeA := DirectSum( [ eA, eA ] );
+
+phi_plus_psi := DirectSumFunctorialWithGivenDirectSums( fiA, [ phi, psi ], efA );
+
+IsWellDefined( phi_plus_psi );
+#true
+
+eta_plus_phi := DirectSumFunctorialWithGivenDirectSums( efA, [ eta, phi ], eeA );
+
+phi_plus_gamma := DirectSumFunctorialWithGivenDirectSums( fiA, [ phi, gamma ], eeA );
+
+PreCompose( phi_plus_psi, eta_plus_phi ) = phi_plus_gamma;
+#true
+
+eta = PreCompose( PreCompose( InjectionOfCofactorOfDirectSumWithGivenDirectSum( [ eA, fA ], 1, efA ), eta_plus_phi ), ProjectionInFactorOfDirectSumWithGivenDirectSum( [ eA, eA ], 1, eeA ) );
+#true
+
+ZeroMorphism( eA, eA ) = PreCompose( PreCompose( InjectionOfCofactorOfDirectSumWithGivenDirectSum( [ eA, fA ], 1, efA ), eta_plus_phi ), ProjectionInFactorOfDirectSumWithGivenDirectSum( [ eA, eA ], 2, eeA ) );
+#true
 
 

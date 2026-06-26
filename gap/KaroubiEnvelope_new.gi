@@ -224,9 +224,7 @@ InstallMethod( KaroubiEnvelope,
                 e_L := List( L, x -> IdempotentDatum( x ) );
                 under_L := List( e_L, e_x -> Source( e_x ) );
                 dirsum_under_L := DirectSum( C, under_L );
-                idempotent_of_dirsum := DirectSumFunctorialWithGivenDirectSums( C, dirsum_under_L,
-                                List( [ 1 .. Length( under_L ) ], k -> PreCompose( C, e_L[k], InjectionOfCofactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ) ) ),
-                                dirsum_under_L );
+                idempotent_of_dirsum := DirectSumFunctorialWithGivenDirectSums( C, dirsum_under_L, e_L, dirsum_under_L );
                 return ObjectConstructor( KarEnvC, idempotent_of_dirsum );
             end );
 
@@ -300,9 +298,7 @@ InstallMethod( KaroubiEnvelope,
                     e_L := List( L, x -> IdempotentDatum( x ) );
                     under_L := List( e_L, e_x -> Source( e_x ) );
                     coprod_under_L := Coproduct( C, under_L );
-                    idempotent_of_coproduct := CoproductFunctorialWithGivenCoproducts( C, coprod_under_L,
-                                    List( [ 1 .. Length( under_L ) ], k -> PreCompose( C, e_L[k], InjectionOfCofactorOfCoproductWithGivenCoproduct( C, under_L, k, coprod_under_L ) ) ),
-                                    coprod_under_L );
+                    idempotent_of_coproduct := CoproductFunctorialWithGivenCoproducts( C, coprod_under_L, e_L, coprod_under_L );
                     return ObjectConstructor( KarEnvC, idempotent_of_coproduct );
                 end );
 
@@ -337,7 +333,6 @@ InstallMethod( KaroubiEnvelope,
 
             SetIsCartesianCategory( KarEnvC, true );
 
-            #TODO: complete the cartesian structure
             if CanCompute( C, "DirectProduct" ) and CanCompute( C, "UniversalMorphismIntoDirectProductWithGivenDirectProduct" ) and
             CanCompute( C, "ProjectionInFactorOfDirectProductWithGivenDirectProduct" ) and CanCompute( C, "DirectProductFunctorialWithGivenDirectProducts" ) then
 
@@ -348,9 +343,7 @@ InstallMethod( KaroubiEnvelope,
                     e_L := List( L, x -> IdempotentDatum( x ) );
                     under_L := List( e_L, e_x -> Source( e_x ) );
                     dirprod_under_L := DirectProduct( C, under_L );
-                    idempotent_of_dirproduct := DirectProductFunctorialWithGivenDirectProducts( C, dirprod_under_L,
-                                    List( [ 1 .. Length( under_L ) ], k -> PreCompose( C, ProjectionInFactorOfDirectProductWithGivenDirectProduct( C, under_L, k, dirprod_under_L ), e_L[k] ) ),
-                                    dirprod_under_L );
+                    idempotent_of_dirproduct := DirectProductFunctorialWithGivenDirectProducts( C, dirprod_under_L, e_L, dirprod_under_L );
                     return ObjectConstructor( KarEnvC, idempotent_of_dirproduct );
                 end );
 
@@ -425,7 +418,6 @@ InstallMethod( KaroubiEnvelope,
             #preservation of the terminal object
             if HasIsCategoryWithTerminalObject( C ) and IsCategoryWithTerminalObject( C ) then
 
-                #TODO: add the preservation of terminal object category
                 SetIsCategoryWithTerminalObject( KarEnvC, true );
 
                 #we define the terminal object
@@ -455,7 +447,6 @@ InstallMethod( KaroubiEnvelope,
 
             if HasIsCategoryWithInitialObject( C ) and IsCategoryWithInitialObject( C ) then
 
-                #TODO: add the preservation of initial object category
                 SetIsCategoryWithInitialObject( KarEnvC, true );
 
                 #we define the initial object
