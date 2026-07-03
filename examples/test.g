@@ -55,12 +55,12 @@ psi = PreCompose( psi, IdentityMorphism( fA ) );
 CanCompute( kar, "TensorProductOnObjects" );
 #true
 
-one := TensorUnit( kar );
+Tens_one := TensorUnit( kar );
 
-fA = TensorProduct( fA, one );
+fA = TensorProduct( fA, Tens_one );
 #true
 
-IsCongruentForMorphisms( psi, TensorProduct( IdentityMorphism( one ), psi ) );
+IsCongruentForMorphisms( psi, TensorProduct( IdentityMorphism( Tens_one ), psi ) );
 #true
 
 psiphi := TensorProduct( psi, phi );
@@ -90,9 +90,9 @@ IsAbCategory( kar );
 
 zero_ef := ZeroMorphism( eA, fA );
 
-zero := ZeroObject( kar );
+zero_kar := ZeroObject( kar );
 
-zero_zero := ZeroMorphism( zero, zero );
+zero_zero := ZeroMorphism( zero_kar, zero_kar );
 
 TensorProduct( zero_ef, zero_zero + zero_zero ) = zero_zero;
 #true
@@ -127,5 +127,30 @@ eta = PreCompose( PreCompose( InjectionOfCofactorOfDirectSumWithGivenDirectSum( 
 
 ZeroMorphism( eA, eA ) = PreCompose( PreCompose( InjectionOfCofactorOfDirectSumWithGivenDirectSum( [ eA, fA ], 1, efA ), eta_plus_phi ), ProjectionInFactorOfDirectSumWithGivenDirectSum( [ eA, eA ], 2, eeA ) );
 #true
+
+
+###########################################################
+
+Sets := SkeletalCategoryOfFiniteSets( );
+
+KarSets := KaroubiEnvelope( Sets );
+
+T := 3 / Sets;
+
+S := 7 / Sets;
+
+eT := MorphismConstructor( T, [0, 1, 0], T );
+
+eS := MorphismConstructor( S, [0, 1, 0, 1, 4, 5, 4], S );
+
+eSK := eS / KarSets;
+
+eTK := eT / KarSets;
+
+zero_set := InitialObject( KarSets );
+
+one_set := TerminalObject( KarSets );
+
+
 
 
