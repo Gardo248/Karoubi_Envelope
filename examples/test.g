@@ -151,6 +151,22 @@ zero_set := InitialObject( KarSets );
 
 one_set := TerminalObject( KarSets );
 
+Coproduct( eTK, zero_set ) = DirectProduct( eTK, one_set );
+#true
+
+coprodTS := Coproduct( eTK, eSK );
+
+productTS := DirectProduct( eTK, eSK );
+
+productTS = coprodTS;
+#false
+
+injS := InjectionOfCofactorOfCoproductWithGivenCoproduct( [ eTK, eSK ], 2, coprodTS );
+
+#const_zero_from_T_to_S := MorphismConstructor( T, [0, 0, 0 ], S );
+
+
+
 
 
 
