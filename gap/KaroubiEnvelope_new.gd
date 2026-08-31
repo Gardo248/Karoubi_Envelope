@@ -16,7 +16,6 @@ DeclareAttribute( "KaroubiEnvelope",
 DeclareAttribute("UnderlyingCategory",
                 IsKaroubiEnvelope);
 
-#Q: Why in the following two I have to put "IsKaroubiObject" as second part of DeclareAttribute? Is it because we are somehow trying to say "IdempotentDatum is a type depending on "IsKaroubiObject"?
 #note: we use it to define the objects, it represent the type of the fundamental information to give to define the object in the Karoubi envelope, i.e. the idempotent
 DeclareAttribute("IdempotentDatum",
                 IsKaroubiObject);

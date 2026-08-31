@@ -53,7 +53,7 @@ InstallMethod( KaroubiEnvelope,
 
     AddMorphismDatum( KarEnvC,
         function ( KarEnvC, morph )
-            return UnderlyingMorphismDatum ( morph );
+            return UnderlyingMorphismDatum( morph );
     end );
 
     if CanCompute( C, "IsEqualForMorphisms" ) then
@@ -67,8 +67,7 @@ InstallMethod( KaroubiEnvelope,
                 end );
     fi;
     
-        # Remember: these functions always assume that the morphisms are
-        # indeed parallel.
+    # Remember: these functions always assume that the morphisms are indeed parallel.
     if CanCompute( C, "IsCongruentForMorphisms" ) then
         AddIsCongruentForMorphisms( KarEnvC,
             function ( KarEnvC, morphism1, morphism2 )
@@ -88,12 +87,12 @@ InstallMethod( KaroubiEnvelope,
                     f_u := UnderlyingMorphismDatum( f );
                     e_s := IdempotentDatum( Source( f ) );
                     e_t := IdempotentDatum( Target ( f ) );
-                    under_s := Source ( e_s );
-                    under_t := Source ( e_t );
+                    under_s := Source( e_s );
+                    under_t := Source( e_t );
                     return IsWellDefinedForMorphismsWithGivenSourceAndRange( C, under_s, f_u, under_t ) and IsWellDefinedForObjects( C, under_s ) and
                     IsWellDefinedForObjects( C, under_t ) and IsCongruentForMorphisms( f_u, PreCompose( e_s, PreCompose( f_u, e_t ) ) );
                 end );
-        fi;
+    fi;
 
     AddIdentityMorphism( KarEnvC,
             function ( KarEnvC, object )
@@ -131,7 +130,7 @@ InstallMethod( KaroubiEnvelope,
                 e_y := IdempotentDatum( y );
                 under_x := Source( e_x );
                 under_y := Source( e_y );
-                return MorphismConstructor( KarEnvC, x, ZeroMorphism( under_x, under_y ), y );
+                return MorphismConstructor( KarEnvC, x, ZeroMorphism( C, under_x, under_y ), y );
             end );
         fi;
 
@@ -146,7 +145,7 @@ InstallMethod( KaroubiEnvelope,
                 t := Target( phi1 );
                 phi1_under := UnderlyingMorphismDatum( phi1 );
                 phi2_under := UnderlyingMorphismDatum( phi2 );
-                return MorphismConstructor( KarEnvC, s, AdditionForMorphisms( phi1_under, phi2_under ), t );
+                return MorphismConstructor( KarEnvC, s, AdditionForMorphisms( C, phi1_under, phi2_under ), t );
             end );
         fi;
 
@@ -159,7 +158,7 @@ InstallMethod( KaroubiEnvelope,
                 s := Source( phi );
                 t := Target( phi );
                 phi_under := UnderlyingMorphismDatum( phi );
-                return MorphismConstructor( KarEnvC, s, AdditiveInverseForMorphisms( phi_under ), t );
+                return MorphismConstructor( KarEnvC, s, AdditiveInverseForMorphisms( C, phi_under ), t );
             end );
         fi;
     fi;
@@ -169,14 +168,13 @@ InstallMethod( KaroubiEnvelope,
         SetIsEnrichedOverCommutativeRegularSemigroup( KarEnvC, true );
     fi;
 
-    #todo: add the if hasiscocartesian and is cocartesian then...
-    #todo: if it is additive then derive the product and coproduct directly, else if it is cartesian or cocartesian derive it separately, also the zeroobject will be in the else stuff
+    #we add the derivation of the additive structure
     if HasIsAdditiveCategory( C ) and IsAdditiveCategory( C ) then
         SetIsAdditiveCategory( KarEnvC, true  );
 
         #we define the zero object for additive category
         if CanCompute( C, "ZeroObject" ) then
-            AddZeroObject(  KarEnvC, 
+            AddZeroObject( KarEnvC, 
             function( KarEnvC )
                 local C, zero_C;
                 C := UnderlyingCategory( KarEnvC );
@@ -217,7 +215,6 @@ InstallMethod( KaroubiEnvelope,
 
             #we define the direct sum of a list of objects in the Karoubi envelope relying on the direct sum of the underlying category C
             AddDirectSum( KarEnvC,
-            #Q: in the case of the direct sum, I could define the k-th element defining the idempotent of the direct sum either as Precompose( C, e_L[k], InjectionOfCofactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ) ) ) or as Precompose( C, ProjectionInFactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ), e_L[k] ) ). I believe that the two are both equal to the morphism Precompose( C, ProjectionInFactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ), Precompose( C, e_L[k], InjectionOfCofactorOfDirectSumWithGivenDirectSum( C, under_L, k, dirsum_under_L ) ) ) ). Is it smart to use this form in the implementation? It allows you not to choose between one or the other, but makes the code more complicated
             function( KarEnvC, L )
                 local C, e_L, under_L, dirsum_under_L, idempotent_of_dirsum;
                 C := UnderlyingCategory( KarEnvC );
@@ -228,7 +225,7 @@ InstallMethod( KaroubiEnvelope,
                 return ObjectConstructor( KarEnvC, idempotent_of_dirsum );
             end );
 
-            #we define the injection into the direct sum of a list of objects
+            #we define the injection into the direct sum of the k-th object in a list "L" of objects
             AddInjectionOfCofactorOfDirectSumWithGivenDirectSum( KarEnvC,
             function( KarEnvC, L, k, dirsum )
                 local C, e_L, under_L, under_dirsum;
@@ -239,7 +236,7 @@ InstallMethod( KaroubiEnvelope,
                 return MorphismConstructor( KarEnvC, L[k], PreCompose( C, e_L[k], InjectionOfCofactorOfDirectSumWithGivenDirectSum( C, under_L, k, under_dirsum ) ), dirsum ); 
             end );
 
-            #we define the universal morphism from the direct sum of a list of objects induced by a list of morphisms into an object z
+            #we define the universal morphism from the direct sum of a list "L" of objects induced by a list "tao" of morphisms into an object "z"
             AddUniversalMorphismFromDirectSumWithGivenDirectSum( KarEnvC,
             function( KarEnvC, L, z, tao, dirsum )
                 local C, e_L, under_L, under_tao, e_z, under_z, under_dirsum;
@@ -254,7 +251,7 @@ InstallMethod( KaroubiEnvelope,
                 return MorphismConstructor( KarEnvC, dirsum, UniversalMorphismFromDirectSumWithGivenDirectSum( C, under_L, under_z, under_tao, under_dirsum ), z );
             end );
 
-            #we define the projection from the direct sum of a list of objects
+            #we define the projection from the direct sum into the k-th factor of a list "L" of objects
             AddProjectionInFactorOfDirectSumWithGivenDirectSum( KarEnvC,
             function( KarEnvC, L, k, dirsum )
                 local C, e_L, under_L, under_dirsum;
@@ -265,7 +262,7 @@ InstallMethod( KaroubiEnvelope,
                 return MorphismConstructor( KarEnvC, dirsum, PreCompose( C, ProjectionInFactorOfDirectSumWithGivenDirectSum( C, under_L, k, under_dirsum ), e_L[k] ), L[k] ); 
             end );
 
-            #we define the universal morphism into the direct sum of a list of objects induced by a list of morphisms from an object z
+            #we define the universal morphism into the direct sum of a list "L" of objects induced by a list "tao" of morphisms from an object "z"
             AddUniversalMorphismIntoDirectSumWithGivenDirectSum( KarEnvC,
             function( KarEnvC, L, z, tao, dirsum )
                 local C, e_L, under_L, under_tao, e_z, under_z, under_dirsum;
@@ -285,12 +282,13 @@ InstallMethod( KaroubiEnvelope,
         #preservation of cocartesian structure
         if HasIsCocartesianCategory( C ) and IsCocartesianCategory( C ) then
 
-            SetIsCocartesianCategory( KarEnvC, true  );
-            #TODO: complete the cocartesian structure
+            SetIsCocartesianCategory( KarEnvC, true );
+            #Q: should I add the preservation of initial object or I can just rely on the implementation below?
 
             if CanCompute( C, "Coproduct" ) and CanCompute( C, "UniversalMorphismFromCoproductWithGivenCoproduct" ) and
             CanCompute( C, "InjectionOfCofactorOfCoproductWithGivenCoproduct" ) and CanCompute( C, "CoproductFunctorialWithGivenCoproducts" ) then
 
+                #we define the coproduct of a list of objects in the Karoubi envelope relying on the coproduct of the underlying category C
                 AddCoproduct( KarEnvC,
                 function( KarEnvC, L )
                     local C, e_L, under_L, coprod_under_L, idempotent_of_coproduct;
@@ -302,6 +300,7 @@ InstallMethod( KaroubiEnvelope,
                     return ObjectConstructor( KarEnvC, idempotent_of_coproduct );
                 end );
 
+                #we define the injection into the coproduct of the k-th object in a list "L" of objects
                 AddInjectionOfCofactorOfCoproductWithGivenCoproduct( KarEnvC,
                 function( KarEnvC, L, k, coprod )
                     local C, e_L, under_L, under_coprod;
@@ -312,6 +311,7 @@ InstallMethod( KaroubiEnvelope,
                     return MorphismConstructor( KarEnvC, L[k], PreCompose( C, e_L[k], InjectionOfCofactorOfCoproductWithGivenCoproduct( C, under_L, k, under_coprod ) ), coprod ); 
                 end );
 
+                #we define the universal morphism from the coproduct of a list "L" of objects induced by a list "tao" of morphisms into an object "z"
                 AddUniversalMorphismFromCoproductWithGivenCoproduct( KarEnvC,
                 function( KarEnvC, L, z, tao, coprod )
                     local C, e_L, under_L, under_tao, e_z, under_z, under_coprod;
@@ -332,10 +332,12 @@ InstallMethod( KaroubiEnvelope,
         if HasIsCartesianCategory( C ) and IsCartesianCategory( C ) then
 
             SetIsCartesianCategory( KarEnvC, true );
+            #Q: should I add the preservation of terminal object or I can just rely on the implementation below?
 
             if CanCompute( C, "DirectProduct" ) and CanCompute( C, "UniversalMorphismIntoDirectProductWithGivenDirectProduct" ) and
             CanCompute( C, "ProjectionInFactorOfDirectProductWithGivenDirectProduct" ) and CanCompute( C, "DirectProductFunctorialWithGivenDirectProducts" ) then
 
+                #we define the direct product of a list of objects in the Karoubi envelope relying on the direct product of the underlying category C
                 AddDirectProduct( KarEnvC,
                 function( KarEnvC, L )
                     local C, e_L, under_L, dirprod_under_L, idempotent_of_dirproduct;
@@ -347,6 +349,7 @@ InstallMethod( KaroubiEnvelope,
                     return ObjectConstructor( KarEnvC, idempotent_of_dirproduct );
                 end );
 
+                #we define the projection from the direct product into the k-th factor of a list "L" of objects
                 AddProjectionInFactorOfDirectProductWithGivenDirectProduct( KarEnvC,
                 function( KarEnvC, L, k, dirprod )
                     local C, e_L, under_L, under_dirprod;
@@ -357,6 +360,7 @@ InstallMethod( KaroubiEnvelope,
                     return MorphismConstructor( KarEnvC, dirprod, PreCompose( C, ProjectionInFactorOfDirectProductWithGivenDirectProduct( C, under_L, k, under_dirprod ), e_L[k] ), L[k] ); 
                 end );
 
+                #we define the universal morphism into the direct product of a list "L" of objects induced by a list "tao" of morphisms from an object "z"
                 AddUniversalMorphismIntoDirectProductWithGivenDirectProduct( KarEnvC,
                 function( KarEnvC, L, z, tao, dirprod )
                     local C, e_L, under_L, under_tao, e_z, under_z, under_dirprod;
@@ -388,7 +392,7 @@ InstallMethod( KaroubiEnvelope,
                 end );
             fi; 
 
-            #we define the universal morphism from the zero object into any other object of the category
+            #we define the universal morphism from the zero object into any object of the category
             if CanCompute( C, "UniversalMorphismFromZeroObjectWithGivenZeroObject" ) then
                 AddUniversalMorphismFromZeroObjectWithGivenZeroObject( KarEnvC,
                 function( KarEnvC, x, zero )
@@ -475,16 +479,16 @@ InstallMethod( KaroubiEnvelope,
 
             fi;
         fi;
+        #Q: should I add also the bicartesian structure? Do I have to add all the things one by one again or I can just rely on the above implementations?
     fi;
 
 
-    #note: preservation of monoidal structure
-
+    #preservation of monoidal structure
     if HasIsMonoidalCategory( C ) and IsMonoidalCategory( C ) then
         SetIsMonoidalCategory( KarEnvC, true );
 
         if CanCompute( C, "TensorUnit" ) then 
-            #note: tensor unit
+            #tensor unit
             AddTensorUnit( KarEnvC,
             function( KarEnvC )
                 local C, unit, id_unit;
@@ -496,7 +500,7 @@ InstallMethod( KaroubiEnvelope,
         fi; 
 
         if CanCompute( C, "TensorProductOnMorphismsWithGivenTensorProducts" ) and CanCompute( C, "TensorProductOnObjects" ) then
-            #note: tensor product on objects
+            #tensor product on objects
             AddTensorProductOnObjects( KarEnvC,
             function ( KarEnvC, x, y )
                 local C, e_x, e_y, under_x, under_y, under_xy;
@@ -509,7 +513,7 @@ InstallMethod( KaroubiEnvelope,
                 return ObjectConstructor( KarEnvC, TensorProductOnMorphismsWithGivenTensorProducts( C, under_xy, e_x, e_y, under_xy ) );
             end );
 
-            #note: tensor product on morphisms
+            #tensor product on morphisms
             AddTensorProductOnMorphismsWithGivenTensorProducts( KarEnvC,
             function ( KarEnvC, source, phi1, phi2, target )
                 local C, under_phi1, under_phi2, under_source, under_target;
@@ -522,8 +526,8 @@ InstallMethod( KaroubiEnvelope,
             end );
         fi;
 
-        #note: left unitor
         if CanCompute( C, "LeftUnitorWithGivenTensorProduct") then
+            #left unitor
             AddLeftUnitorWithGivenTensorProduct( KarEnvC, 
             function( KarEnvC, x, one_times_x )
                 local C, Karunit, e_x, under_x, under_one_times_x, leftunitor_under;
@@ -536,8 +540,8 @@ InstallMethod( KaroubiEnvelope,
             end );
         fi;
 
-        #note: inverse of left unitor
         if CanCompute( C, "LeftUnitorInverseWithGivenTensorProduct") then
+            #inverse of left unitor
             AddLeftUnitorInverseWithGivenTensorProduct( KarEnvC, 
             function( KarEnvC, x, one_times_x )
                 local C, Karunit, e_x, under_x, under_one_times_x, leftunitorinv_under;
@@ -550,8 +554,8 @@ InstallMethod( KaroubiEnvelope,
             end );
         fi;
 
-        #note: right unitor
         if CanCompute( C, "RightUnitorWithGivenTensorProduct") then
+            #right unitor
             AddRightUnitorWithGivenTensorProduct( KarEnvC, 
             function( KarEnvC, x, x_times_one )
                 local C, Karunit, e_x, under_x_times_one, under_x, rightunitor_under;
@@ -564,8 +568,8 @@ InstallMethod( KaroubiEnvelope,
             end );
         fi;
 
-        #note: inverse of right unitor
         if CanCompute( C, "RightUnitorInverseWithGivenTensorProduct") then
+            #inverse of right unitor
             AddRightUnitorInverseWithGivenTensorProduct( KarEnvC, 
             function( KarEnvC, x, x_times_one )
                 local C, Karunit, e_x, under_x, under_x_times_one, rightunitorinv_under;
@@ -578,8 +582,8 @@ InstallMethod( KaroubiEnvelope,
             end );
         fi;
 
-        #note: associator from right to left
         if CanCompute( C, "AssociatorRightToLeftWithGivenTensorProducts" ) then
+            #associator from right to left
             AddAssociatorRightToLeftWithGivenTensorProducts( KarEnvC, 
             function( KarEnvC, source, x, y, z, target )
                 #source = x otimes ( y otimes z )
@@ -598,8 +602,8 @@ InstallMethod( KaroubiEnvelope,
             end );
         fi;
 
-        #note: associator from left to right
         if CanCompute( C, "AssociatorLeftToRightWithGivenTensorProducts" ) then
+            #associator from left to right
             AddAssociatorLeftToRightWithGivenTensorProducts( KarEnvC, 
             function( KarEnvC, source, x, y, z, target )
                 #source = ( x otimes y ) otimes z 
@@ -620,12 +624,9 @@ InstallMethod( KaroubiEnvelope,
         
         if HasIsAdditiveMonoidalCategory( C ) and IsAdditiveMonoidalCategory( C ) then
             SetIsAdditiveMonoidalCategory( KarEnvC, true );
+            #TODO: add the preservation of the additive monoidal structure
         fi;
     fi;
-
-    # if Has( C ) and ( C ) then
-    #     Set( KarEnvC, true );
-    # fi;
 
     Finalize( KarEnvC );
   
